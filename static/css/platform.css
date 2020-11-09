@@ -1,0 +1,66 @@
+
+html{
+    font-size: 62.5%;
+}
+html,body{
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    min-width: 1400px;
+    min-height: 700px;
+    background-color: #000928;
+
+}
+
+body{
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    font-size: 12px;
+    font-size: 1.2rem;
+
+}
+
+.hideScrollY{
+    /*-ms-overflow-style: none; !* IE 10+ *!*/
+    /*overflow-x: auto;*/
+    /*overflow: -moz-scrollbars-none;!*Firefox*!*/
+}
+/*.hideScrollY::-webkit-scrollbar { width: 0 !important }!*chrome 和Safari*!*/
+
+.h-table {
+    display: table;
+}
+.h-cell {
+    display: table-cell;
+    vertical-align: middle;
+    width: 100%;
+    height: 100%;
+}
+.h-nav-checkcolor{
+    color: #02eeff;
+    font-weight: bold;
+    border-image: url(/static/images/platform/home/insex_img02.png) 21 fill / 30px stretch;
+    /*background-image: url(/static/images/platform/insex_img03.png) ;background-repeat:no-repeat ;background-size:100% 100%;*/
+}
+.h-nav-color{
+    color: #e4fdff;
+}
+.h-nav-checkbg{
+    color: #02eeff;
+    font-weight: bold;
+}
+/*鼠标触发的链接颜色*/
+.h-nav a:hover{
+    color: #02eeff !important;
+}
+
+/*单行超出长度省略号显示*/
+.slh-div {
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+}

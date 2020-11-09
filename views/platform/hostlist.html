@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" media="screen" href="/static/css/platform.css">
+    <link rel="stylesheet" href="/static/css/zTreeStyle/zTreeStyle.css"/>
+    <link rel="stylesheet" href="/static/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/static/css/border.css"/>
+    <link rel="stylesheet" href="/static/css/table.css">
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/layui/layui.js"></script>
+    <script src="/static/js/jquery.ztree.all.js"></script>
+    <style>
+        .borderdiv{
+            border: 1px solid #00ccff;
+            border-radius:5px;
+            box-shadow:rgb(0,59,91) 0px 0px 20px inset;
+            height: 60%;
+            background: rgba(255,255,255,0.05);
+            position:relative;
+            margin: 20px;
+        }
+        .ztree li a {
+            color: #65e0e3;
+        }
+        .layui-table-tool {
+            background: transparent;
+            border: 0px;
+        }
+        /*下拉框样式*/
+        .commontext {
+            color: #65e0e3;
+            font-size: 12px;
+            height: 30px;
+        }
+
+        .layui-form-label {
+            float: left;
+            display: block;
+            padding: 5px 15px;
+            width: 80px;
+            font-weight: 400;
+            line-height: 20px;
+            text-align: right;
+        }
+
+        .layui-form input {
+            background-color: transparent;
+            border-radius: 5px;
+            color: white;
+            height: 30px;
+            border: 1px solid #00fcf9;
+            background: transparent;
+        }
+
+        .layui-form-select dl {
+            background-color: #2F4056;
+        }
+
+        .layui-form-select dl dd {
+            color: white;
+            background: #2F4056;
+        }
+
+        .layui-form-select dl dd:hover {
+            background: #00ccff;
+        }
+
+        /*修改提示文字颜色 */
+        input::-webkit-input-placeholder {
+            color: white;
+            font-size: 12px;
+        }
+        .layui-layer-page .layui-layer-content {
+            background: #152f5b;
+            color: #ffffff;
+            border-top: 1px solid #6076ad;
+            border-bottom: 1px solid #6076ad;
+            border-left: 1px solid #6076ad;
+            border-right: 1px solid #6076ad;
+            border-radius: 5px;
+        }
+        .layui-input {
+            background-color: transparent;
+            color: #FFF;
+            border: 1px solid #00fcf9;
+            border-radius: 5px;
+            height: 35px;
+        }
+        .btn-submit {
+            border: 1px solid #00fcf9;
+            width: 100%;
+            height: 30px;
+            line-height: 30px;
+            background: #FFB800;
+        }
+
+    </style>
+</head>
+<body>
+<div style="width: 100%;background: url(/static/images/platform/index_bg.jpg) no-repeat; min-height: 100%;">
+    <!-- 顶部 -->
+    {{template "platform/commons/header.html" .}}
+    <div class="layui-row">
+        <div class="layui-rol-md12" style="margin-bottom: 20px">
+            <span style="color: #65e0e3; margin-left: 20px; font-size: 12px; ;">
+                <a href="/platform/centerpage" style="color: #65e0e3;">个人中心</a>&nbsp;>&nbsp;主机列表
+            </span>
+        </div>
+
+        <div class="layui-col-md12">
+            <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+                    <div style="border-image: url(/static/images/img_titile_bg.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                        <div class="h-table" style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                            <div class="h-cell">
+                                分析主机管理
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+                <input type="hidden" id="zid">
+                <div style="top: 62px;bottom: 0px;left: 5px;right: 5px;">
+                    <div style="width: 100%;height: 50px;line-height: 50px;margin-bottom: -10px;">
+                        <form class="layui-form" action="" lay-filter="regionform">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label commontext">主机状态:</label>
+                                    <div class="layui-input-block" style="width: 100px">
+                                        <select id="hoststatus" name="hoststatus" lay-filter="hoststatus" lay-verify="required">
+                                            <option value="-1">全部</option>
+                                            <option value="0">在线</option>
+                                            <option value="1">维护中</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+                    <div class="layui-row" style="height: 100%">
+                        <div class="layui-col-md12">
+                            <div class="layui-col-md12">
+                                <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                                    <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                                    <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                                    <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                                    <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+                                    <table id="hostList" lay-filter="hostList"></table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/html" id="toolbar">
+    <div class="layui-row">
+        <div class="layui-col-md5">
+            <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="add">添加</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除</button>
+{{/*            <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="update">版本升级</button>*/}}
+{{/*            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="back">版本回退</button>*/}}
+{{/*            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="restart">立即重启</button>*/}}
+        </div>
+        <div class="layui-col-md7">
+        </div>
+    </div>
+</script>
+<script type="text/html" id="bar">
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="set">设置</a>
+{{/*    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>*/}}
+</script>
+<input type="hidden" id="selectOrgId" value="0"/>
+<input type="hidden" id="selectOrgStatus" value="-1"/>
+<script type="text/javascript">
+    layui.config({
+        base:'/static/js/'
+    }).extend({
+        formSelects:'formSelects-v4'
+    });
+</script>
+<script>
+
+    layui.config({base:'/static/layui/lay/tablePlug/'}).use('tablePlug',function(){
+
+    });
+    layui.use(['element', 'form', 'table', 'tablePlug'], function() {
+        var table = layui.table;
+        var form = layui.form;
+        var tablePlug = layui.tablePlug;
+        tablePlug.smartReload.enable(true);
+        // 监听主机状态
+        form.on('select(hoststatus)', function (obj) {
+            $("#selectOrgStatus").val(obj.value);
+            tableReload($("#selectOrgId").val(), obj.value);
+        });
+        function tableReload(org_id, status) {
+            table.reload('testReload', {
+                url: '/platform/hostlist', //接口地址
+                page: {
+                    curr: 1
+                },
+                where: {
+                    "org_id": org_id,
+                    "hostStatus": status
+                },
+            });
+        }
+        table.render({
+            elem: '#hostList',
+            url:'/platform/hostlist',
+            toolbar: "#toolbar",
+            id:"testReload",
+            method:"post",
+            defaultToolbar: '',
+            loading: false,
+            limits : [5,10,20],
+            // cellMinWidth: 80,
+            cols: [
+                [{
+                    checkbox: true
+                },
+                    {
+                        field: 'id',
+                        title: 'ID',
+                        align: 'center',
+                        hide: true
+                    },
+                    {
+                        field: 'name',
+                        title: '主机名称',
+                        align: 'center',
+                    },
+
+                    {
+                        field: 'hostIP',
+                        title: '主机IP',
+                        align: 'center',
+                    },
+
+                    {
+                        field: 'state',
+                        title: '状态',
+                        align: 'center',
+                        templet: function(d){
+                            if (d.state==0) {
+                                return '<span style=\'color:#00FF00\'>'+ "在线" +'</span>'
+                            } else {
+                                return '<span style=\'color:red\'>'+ "维护中" +'</span>'
+                            }
+                        }
+                    },
+
+                    {
+                        field: 'sync_center',
+                        title: '同步中心',
+                        align: 'center',
+                    },
+                    {
+                        field: 'switchOn',
+                        title: '已开启算法路数',
+                        align: 'center',
+                    },
+                    {
+                        field: 'switchOFF',
+                        title: '未开启算法路数',
+                        align: 'center',
+                    },
+                    {
+                        title: '操作',
+                        align: 'center',
+                        toolbar: '#bar',
+                        width: 260
+                    }
+                ]
+            ],
+            page: true,
+            where: {
+                'hostStatus' : -1
+            },
+            parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                return {
+                    "code": res.Code, //解析接口状态
+                    "data": res.Reason,//解析数据列表
+                    "count":res.Num
+                };
+            }
+        });
+        var $ = layui.$, active = {
+            reload: function(){
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    ,where: {
+                    }
+                }, 'data');
+            }
+        };
+
+        $('.layui-inline .layui-btn').on('click', function(){
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        table.on('toolbar(hostList)', function(obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            if (obj.event === 'add') {
+                layer.open({
+                    type: 1,
+                    title: '',
+                    area: ['800px','360px'],
+                    shade: [0.8, '#000'],
+                    content: $("#hostView"),
+                    success: function(layero, index) {
+                        $("#host_id").val('');
+                        $("#name").val('');
+                        $("#hostIP").val('');
+                        $("#sync_center").val('');
+                        $("#org").val('');
+                        $("#alarmNumber").val('');
+                        $("#hostView").removeClass("layui-hide");
+                        $("#divorg").removeClass("layui-hide");
+                    },
+                    cancel: function(index, layero) {
+                        $("#hostView").addClass("layui-hide");
+                    }
+                });
+            }else if (obj.event === 'delete') {
+                layer.open({
+                    content: '确定批量删除已选择的分析主机？'
+                    ,btn: ['确定', '取消']
+                    ,yes: function(index, layero){
+                        var ids = '';
+                        for (var i=0; i<checkStatus.data.length;i++) {
+                            ids += "'" + checkStatus.data[i].hostID + "',"
+                        }
+                        ids = ids.substring(0,ids.length-1);
+                        $.ajax({
+                            url: '/platform/delBatchHost',
+                            method: 'post',
+                            data:  {
+                                'hostIDS': ids
+                            },
+                            success: function (res) {
+                                if (res.Ret == 1) {
+                                    layer.alert(res.Reason, {closeBtn:0},function () {
+                                        layer.closeAll();
+                                        var table = layui.table;
+                                        table.reload('testReload',{page: {
+                                                curr: 1 //重新从第 1 页开始
+                                            }});
+                                    });
+                                } else {
+                                    layer.alert(res.Reason);
+                                }
+                            },
+                            error: function (data) {
+                                layer.alert("服务器连接错误");
+                            }
+                        });
+                    }
+                    ,btn2: function(index, layero){
+                    }
+                    ,cancel: function(){
+                    }
+                });
+
+            }
+        });
+        // 行内
+        table.on('tool(hostList)', function(obj) {
+            if (obj.event === 'set') {
+                if(browser.versions.trident){
+                    window.location.href="/platform/centercameramanageriepage?hostID="+obj.data.hostID;
+                }else{
+                    window.location.href="/platform/centercameramanagerpage?hostID="+obj.data.hostID;
+                }
+
+            } else if (obj.event == 'edit') {
+                layer.open({
+                    type: 1,
+                    title: '',
+                    area: ['700px','400px'],
+                    content: $("#hostView"),
+                    shade: [0.8, '#000'],
+                    success: function(layero, index) {
+                        $("#host_id").val(obj.data.hostID);
+                        $("#name").val(obj.data.name);
+                        $("#hostIP").val(obj.data.hostIP);
+                        $("#sync_center").val(obj.data.sync_center);
+                        $("#alarmNumber").val(obj.data.alarmNumber);
+                        $("#divorg").addClass("layui-hide");
+                        $("#hostView").removeClass("layui-hide");
+                    },
+                    cancel: function(index, layero) {
+                        $("#hostView").addClass("layui-hide");
+                    }
+                });
+            }
+        });
+    });
+    function renderdiv() {
+        layui.use('table', function(){
+            var table = layui.table;
+            table.render({
+                elem: '#cameras',
+                url: '/config/selversionList', //接口地址
+                // toolbar: "#toolbar",
+                // id:"testReload",
+                defaultToolbar: '',
+                method:"post",
+                cellMinWidth: 80,
+                cols: [
+                    [{type:'radio'},
+                        {
+                            field: 'verName',
+                            title: '版本号',
+                            align: 'center',
+                        },
+                        {
+                            field: 'verRemark',
+                            title: '版本说明',
+                            align: 'center',
+                        },
+                        {
+                            field: 'createTime',
+                            title: '上传时间',
+                            align: 'center',
+                        }
+                    ]
+                ],
+                page: true,
+                parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                    return {
+                        "code": res.Code, //解析接口状态
+                        "data": res.Reason,//解析数据列表
+                        "count":res.Num
+                    };
+                }
+            });
+        });
+
+    }
+    function save() {
+        var hostID = $("#host_id").val();
+        var name = $("#name").val();
+        var hostIP = $("#hostIP").val();
+        var sync_center = $("#sync_center").val();
+        var orgId = $("#org").val();
+        var alarmNumber = $("#alarmNumber").val();
+        if (hostIP=="" || alarmNumber == '') {
+            layer.alert('缺少必填参数');
+            return;
+        }else{
+            $.ajax({
+                url: '/platform/hostManage',
+                method: 'post',
+                data:  {
+                    'hostID':hostID,
+                    'name':name,
+                    'hostIP':hostIP,
+                    'alarmNumber':alarmNumber,
+                    'sync_center':sync_center,
+                },
+                success: function (res) {
+                    if (res.Ret == 1) {
+                        layer.alert(res.Reason,function () {
+                            layer.closeAll();
+                            var table = layui.table;
+                            table.reload('testReload',{page: {
+                                    curr: 1 //重新从第 1 页开始
+                                }});
+                        });
+                    } else {
+                        layer.alert(res.Reason);
+                    }
+                },
+                error: function (data) {
+                    layer.alert("服务器连接错误");
+                }
+            });
+        }
+    }
+    function cancel() {
+        layer.closeAll();
+    }
+
+
+</script>
+
+</body>
+<div style="padding-top: 20px; box-shadow:rgb(0,59,91) 0px 0px 20px inset;" class="layui-hide" id="hostView" >
+    <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+        <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+            <div style="border-image: url(/static/images/img_titile_bg.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                <div class="h-table" style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                    <div class="h-cell">
+                        添加主机
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+        <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+        <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+        <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+        <form class="layui-form" style="margin: 20px 20px 0px 20px;" lay-filter="editcamera">
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg3" style="text-align: right;padding-right: 20px;">
+                        <span style="color:red">*</span></span><span>主机名称</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <input id="host_id" type="hidden" />
+                        <input id="name" class="layui-input" type="text" lay-verify="required" placeholder="请输入主机名称" />
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg1" style="text-align: right;padding-right: 20px;">
+                        &nbsp;
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg3" style="text-align: right;padding-right: 20px;">
+                        <span style="color:red">*</span><span>主机IP</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <input id="hostIP" class="layui-input" type="text" lay-verify="required" placeholder="请输入主机IP" />
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg1" style="text-align: right;padding-right: 20px;">
+                        &nbsp;
+                    </div>
+                </div>
+            </div>
+
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg3" style="text-align: right;padding-right: 20px;">
+                        <span>同步中心地址</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <input id="sync_center" class="layui-input" type="text" placeholder="请输入同步中心地址" />
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg1" style="text-align: right;padding-right: 20px;">
+                        &nbsp;
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg3" style="text-align: right;padding-right: 20px;">
+                        <span style="color:red">*</span><span>报警编号</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <input id="alarmNumber" class="layui-input" type="text" placeholder="请输入报警编号" maxlength="4" lay-verify="required"/>
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg1" style="text-align: right;padding-right: 20px;">
+                        &nbsp;
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg3" style="text-align: right;padding-right: 20px;">
+                        &nbsp;
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <button type="button" class="layui-btn btn-submit" lay-filter="formDemo" onclick="save()">保存</button>
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg1" style="text-align: right;padding-right: 20px;">
+                        &nbsp;
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+</div>
+<!-- 版本升级 -->
+
+
+<div id="verlist" style="padding:10px; display: none;">
+    <table id="cameras" class="layui-hide"></table>
+</div>
+</html>

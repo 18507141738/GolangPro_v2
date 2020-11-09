@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>{{.SystemTitle}}</title>
+		<link rel="stylesheet" href="/static/layui/css/layui.css" />
+		
+	</head>
+	<script src="/static/js/jquery-3.3.1.min.js"></script>
+	<script src="/static/layui/layui.js"></script>
+	<style>
+		html,body{
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+
+	<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+		<!-- 顶部 -->
+		{{template "config/commons/header.html" .}}
+		<!-- 菜单 -->
+		{{template "config/commons/menu.html" .}}
+		<div class="layui-body">
+			<div id="bodycon">
+				<div style="padding: 5px;">
+					<blockquote class="layui-elem-quote font-weight">区域管理</blockquote>
+				</div>
+				<div style="position: absolute;top: 62px;bottom: 0px;left: 5px;right: 5px;">
+					<table id="cameraList" lay-filter="cameraList"></table>
+				</div>
+			</div>
+		</div>
+		<!-- 底部 -->
+		{{template "config/commons/footer.html" .}}
+	</div>
+	<script type="text/html" id="toolbar">
+		<div class="layui-btn-container">
+			<button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+			<button class="layui-btn layui-btn-warm layui-btn-sm" lay-event="edit">修改</button>
+			<button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">删除</button>
+		</div>
+	</script>
+	</body>
+
+	<script>
+		var html = '';
+		layui.use(['element','table'], function(){
+			var element = layui.element;
+			var table = layui.table;
+
+			table.render({
+				elem: '#cameraList',
+				url: '/config/sellocations', //接口地址
+				toolbar: "#toolbar",
+				id:"testReload",
+				method: "post",
+				defaultToolbar: '',
+				cellMinWidth: 80,
+				cols: [
+					[{checkbox: true},
+						{
+							field: 'place_id',
+							title: 'ID',
+							align: 'center',
+							hide: true
+						},
+						{
+							field: 'place_name',
+							title: '地点名称',
+							align: 'center',
+						},
+						{
+							field: 'name',
+							title: '隶属组织',
+							align: 'center',
+						},
+						{
+							field: 'createtime',
+							title: '创建时间',
+							align: 'center',
+						}
+					]
+				],
+				page: true,
+				parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+					return {
+						"code": res.Code, //解析接口状态
+						"data": res.Reason,//解析数据列表
+						"count":res.Num
+					};
+				}
+			});
+
+			//头工具栏事件
+			table.on('toolbar(cameraList)', function(obj){
+				var checkStatus = table.checkStatus(obj.config.id);
+				switch(obj.event){
+					case 'add':
+						$("#code").val("0");
+						$("#placename").val("");
+						layer.open({
+							type: 1,
+							title: "添加区域",
+							area: ['400px','260px'],
+							content: $("#view"),
+							success: function(index, layero) {
+								$("#view").removeClass("layui-hide");
+								$.ajax({
+									url: "/config/selOrganizeList",
+									method: 'post',
+									success: function (res) {
+
+										if(res.Code == 1){
+											var data=res.Reason;
+											$("#organize_id").empty();
+											$("#organize_id").append('<option value="">请选择隶属组织</option>');
+											$.each(data, function (index, item) {
+												$("#organize_id").append('<option value="'+item.id+'">'+item.name+'</option>');
+											});
+											var form =layui.form;
+											form.render("select", "editcamera");
+										}else{
+											layer.alert(res.Reason);
+										}
+									},
+									error: function (data) {
+										layer.alert("服务器连接错误");
+									}
+								});
+							},
+							cancel: function(index, layero){
+								layer.close(index);
+								// hiddenView();
+							}
+						});
+						break;
+					case 'edit':
+						if(checkStatus.data.length != 1){
+							layer.open({
+								title: '温馨提示',
+								content: '请选择单条数据操作'
+							});
+						}else{
+							// parent.tools.place("",table);
+							var jsObject = JSON.parse(JSON.stringify(checkStatus.data));
+							$("#code").val("1");
+							$("#place_id").val(jsObject[0].place_id);
+							$("#placename").val(jsObject[0].place_name);
+							layer.open({
+								type: 1,
+								title: "修改区域",
+								area: ['400px','260px'],
+								content: $("#view"),
+								success: function(index, layero) {
+									$("#view").removeClass("layui-hide");
+									$.ajax({
+										url: "/config/selOrganizeList",
+										method: 'post',
+										success: function (res) {
+
+											if(res.Code == 1){
+												var data=res.Reason;
+												$("#organize_id").empty();
+												$("#organize_id").append('<option value="">请选择隶属组织</option>');
+												$.each(data, function (index, item) {
+													if (jsObject[0].org_id == item.id) {
+														$("#organize_id").append('<option value="'+item.id+'" selected="selected">'+item.name+'</option>');
+													} else {
+														$("#organize_id").append('<option value="'+item.id+'">'+item.name+'</option>');
+													}
+												});
+												var form =layui.form;
+												form.val('editcamera', {
+													"organize_id":jsObject[0].org_id,
+												});
+												form.render("select", "editcamera");
+											}else{
+												layer.alert(res.Reason);
+											}
+										},
+										error: function (data) {
+											layer.alert("服务器连接错误");
+										}
+									});
+								},
+								cancel: function(index, layero){
+									layer.close(index);
+									// hiddenView();
+								}
+							});
+						}
+						break;
+					case 'del':
+						if (checkStatus.data.length <1) {
+							parent.layer.open({
+								title: '温馨提示',
+								content: '请选择要删除的数据'
+							});
+							return;
+						}
+						var array = JSON.stringify(checkStatus.data);
+						var arrParse = JSON.parse(array);
+						var ids="";
+						for (var i = 0; i < arrParse.length; i++) {
+							ids+= arrParse[i].place_id+",";
+						}
+						var param={"param":ids};
+						$.ajax({
+							url: '/config/locationDel',
+							method: 'post',
+							data:  param,
+							success: function (res) {
+								if (res.Ret == 1) {
+									layer.alert(res.Reason,function () {
+										layer.closeAll();
+										var table = layui.table;
+										table.reload('testReload',{page: {
+												curr: 1 //重新从第 1 页开始
+											}});
+									});
+
+								} else {
+									layer.alert(res.Reason);
+								}
+							},
+							error: function (data) {
+								layer.alert("服务器连接错误");
+							}
+						});
+						break;
+				}
+			});
+
+		});
+
+		function hiddenView(){
+			var view = document.getElementById("view");
+			view.style.display="none";
+		}
+		function tableReload() {
+			var table = layui.table;
+			table.reload('testReload');
+		}
+
+		function save() {
+			var form = layui.form;
+			var place_id = $("#place_id").val();
+			var code = $("#code").val();
+			var placename = $("#placename").val();
+			var organize_id = $("#organize_id").val();
+			//监听提交
+				// layer.alert(JSON.stringify(data.field));
+				$.ajax({
+					url: '/config/locationAdd',
+					method: 'post',
+					data: {
+						'place_id' : place_id,
+						'code' : code,
+						'placename' : placename,
+						'organize_id' : organize_id
+					},
+					success: function (res) {
+						if (res.Ret == 1) {
+							layer.alert(res.Reason,function () {
+								layer.closeAll();
+								hiddenView();
+								var table = layui.table;
+								table.reload('testReload');
+							});
+						} else {
+							layer.alert(res.Reason);
+						}
+					},
+					error: function (data) {
+						layer.alert("服务器连接错误");
+					}
+				});
+				return false;
+		}
+	</script>
+	<div style="background: white;display: none;" id="view">
+		<form class="layui-form" style="padding: 20px"  lay-filter="editcamera">
+			<input type="hidden" id="place_id" name="place_id">
+			<input type="hidden" id="code" value="0" name="code"><!--0注册1修改-->
+			<div style="width: 100%;height: 38px; line-height: 38px;margin: 0px auto;">
+				<div class="layui-row">
+					<div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+						<span>地点名称</span>
+					</div>
+					<div class="layui-col-md8 layui-col-lg8">
+						<input name="placename" id="placename" class="layui-input" type="text" placeholder="请输入地点名称" lay-verify="required"/>
+					</div>
+				</div>
+			</div>
+			<div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+				<div class="layui-row">
+					<div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+						<span>部门</span>
+					</div>
+					<div class="layui-col-md8 layui-col-lg8">
+						<select id="organize_id" name="organize_id" lay-filter="organize" lay-verify="required">
+							<option value="">选择部门</option>
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<div style="text-align: center;margin:20px;">
+				<button type="button" class="layui-btn" onclick="save()">保存</button>
+				<button type="button" class="layui-btn" onclick="cancel()">取消</button>
+			</div>
+		</form>
+	</div>
+</html>

@@ -1,0 +1,238 @@
+<style>
+    a{color: #e4fdff}
+</style>
+<script type="text/javascript" src="/static/js/browser.js"></script>
+<div style="margin: 0 10px; position: relative;">
+    <img src="/static/images/platform/home/index_img01.png" style="width: 100%;background-size: 100%;position: relative;" />
+    <div style="width: 25%;height: 34%;border-image: url(/static/images/platform/home/insex_img09.png) 20 fill / 10px stretch;position: absolute;top: 18%;left: 5%;">
+        <div class="h-table" style="width: 100%;height: 100%;color: #02eeff;text-align: center;font-size: 1.6rem;">
+            <span class="h-cell">{{.SystemTitle}}</span>
+        </div>
+    </div>
+    <div style="width: 53%;height: 40%;position: absolute;top: 13%;left: 30%;">
+        <div style="width: 100%;height: 100%;position: relative;">
+            <!-- 首页 -->
+            <div class="h-nav" style="width: 10%;height: 100%;position: absolute;">
+                <div style="width: 100%;height: 100%; margin: 0 auto;position: relative;">
+                    <div style="width: 100%;height: 80%;position: absolute;top: 10%;">
+                        <div id="homemenu" class="menu h-table h-nav-color" style="text-align: center;width: 100%;height: 100%;font-size: 1.2rem;" >
+                            <a href="/filter/homepage" class="h-cell" style="">首页</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="zhjc" class="h-nav layui-hide" style="width: 15%;height: 100%;position: absolute;left: 10%;">
+                <div style="width: 100%;height: 100%; margin: 0 auto;position: relative;">
+                    <div style="width: 110%;height: 80%;position: absolute;top: 10%;">
+                        <div id="zh" class="menu h-table h-nav-color" style="text-align: center;width: 100%;height: 100%;font-size: 1.2rem;display: table;" >
+                            <a class="h-cell" style="" href="javascript:getUrl('cloths');">闸门人脸识别</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ywjc" class="h-nav layui-hide" style="width: 15%;height: 100%;position: absolute;left: 25%;">
+                <div style="width: 100%;height: 100%; margin: 0 auto;position: relative;">
+                    <div style="width: 110%;height: 80%;position: absolute;top: 10%;">
+                        <div id="yw" class="menu h-table h-nav-color" style="text-align: center;width: 100%;height: 100%;font-size: 1.2rem;display: table;" >
+                            <a class="h-cell" style="" href="javascript:getUrl('smoke');">厂区烟雾监测</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="hmjc" class="h-nav layui-hide" style="width: 15%;height: 100%;position: absolute;left: 40%;">
+                <div style="width: 100%;height: 100%; margin: 0 auto;position: relative;">
+                    <div style="width: 110%;height: 80%;position: absolute;top: 10%;">
+                        <div id="hm" class="h-table h-nav-color" style="text-align: center;width: 100%;height: 100%;font-size: 1.2rem;display: table;" >
+                            <a class="h-cell" style="" href="javascript:getUrl('fire');">漏水漏泥监测</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="qyjc" class="h-nav layui-hide" style="width: 15%;height: 100%;position: absolute;left: 55%;">
+                <div style="width: 100%;height: 100%; margin: 0 auto;position: relative;">
+                    <div style="width: 110%;height: 80%;position: absolute;top: 10%;">
+                        <div id="qy" class="h-table h-nav-color" style="text-align: center;width: 100%;height: 100%;font-size: 1.2rem;display: table;" >
+                            <a class="h-cell" href="javascript:getUrl('boundary');" style="">高危区域监测</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="lgjc" class="h-nav layui-hide" style="width: 15%;height: 100%;position: absolute;left: 70%;">
+                <div style="width: 100%;height: 100%; margin: 0 auto;position: relative;">
+                    <div style="width: 110%;height: 80%;position: absolute;top: 10%;">
+                        <div id="lg" class="h-table h-nav-color" style="text-align: center;width: 100%;height: 100%;font-size: 1.2rem;display: table;">
+                            <a class="h-cell" style="" href="javascript:getUrl('queue_count');">人数超限监测</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sgjc" class="h-nav layui-hide" style="width: 15%;height: 100%;position: absolute;left: 85%;">
+                <div style="width: 100%;height: 100%; margin: 0 auto;position: relative;">
+                    <div style="width: 110%;height: 80%;position: absolute;top: 10%;">
+                        <div id="sg" class="h-table h-nav-color" style="text-align: center;width: 100%;height: 100%;font-size: 1.2rem;display: table;">
+                            <a class="h-cell" style="" href="javascript:getUrl('sleep_count');">员工睡岗监测</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+{{/*            <div id="xljc" class="h-nav layui-hide" style="width: 13%;height: 100%;position: absolute;left: 86%;">*/}}
+{{/*                <div style="width: 100%;height: 100%; margin: 0 auto;position: relative;">*/}}
+{{/*                    <div style="width: 100%;height: 80%;position: absolute;top: 10%;">*/}}
+{{/*                        <div id="xl" class="h-table h-nav-color" style="text-align: center;width: 100%;height: 100%;font-size: 1.2rem;display: table;">*/}}
+{{/*                            <a class="h-cell" style="" href="/platform/funcpage?type=leakage">泄漏监测</a>*/}}
+{{/*                        </div>*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+{{/*            </div>*/}}
+        </div>
+    </div>
+
+    <input type="hidden" id="bmk" value="{{.bmk}}"/>
+</div>
+<div style=" text-align: center; width: 300px; height: 100px;display: flex;align-items: center;justify-content: center;text-align: center;" id="popup" class="layui-hide">
+    <span id="alarm_popup" style=""></span>
+</div>
+<script>
+    $(function(){
+        var bmk = $("#bmk").val();
+        $(".menu").removeClass("h-nav-checkcolor");
+        if (!$(".menu").hasClass("h-nav-color")) {
+            $(".menu").addClass("h-nav-color");
+        }
+        $("#" + bmk +" a").addClass("h-nav-checkcolor");
+        $("#" + bmk+" a").removeClass("h-nav-color");
+
+        setInterval("alertFunc()",10000); //开始任务
+    });
+
+    function getUrl(type){
+        if(browser.versions.trident){
+            window.location.href = "/filter/funcpageie?type="+type;
+        }else{
+            window.location.href = "/filter/funcpage?type="+type;
+        }
+    }
+
+    $(function(){
+        // 初始化菜单
+        var jurisdiction = {{.jurisdiction}};
+
+        var left = 8;
+
+        if (jurisdiction.indexOf("0") != -1) {
+            $("#zhjc").removeClass("layui-hide");
+            var div = document.getElementById("zhjc");
+            div.style.left = left + "%";
+            left += 15;
+        }
+
+        if (jurisdiction.indexOf("1") != -1) {  //
+            $("#ywjc").removeClass("layui-hide");
+            var div = document.getElementById("ywjc");
+            div.style.left = left + "%";
+            left += 15;
+        }
+
+        if (jurisdiction.indexOf("2") != -1) {
+            $("#hmjc").removeClass("layui-hide");
+            var div = document.getElementById("hmjc");
+            div.style.left = left + "%";
+            left += 15;
+        }
+        if (jurisdiction.indexOf("3") != -1) {
+            $("#qyjc").removeClass("layui-hide");
+            var div = document.getElementById("qyjc");
+            div.style.left = left + "%";
+            left += 15;
+        }
+        // if (jurisdiction.indexOf("4") != -1) {
+        //     $("#lgjc").removeClass("layui-hide");
+        //     var div = document.getElementById("lgjc");
+        //     div.style.left = left + "%";
+        //     left += 15;
+        // }
+        // if (jurisdiction.indexOf("5") != -1) {
+        //     $("#sgjc").removeClass("layui-hide");
+        //     var div = document.getElementById("sgjc");
+        //     div.style.left = left + "%";
+        //     left += 15;
+        // }
+        // if (jurisdiction.indexOf("5") != -1) {
+        //     $("#xljc").removeClass("layui-hide");
+        //     var div = document.getElementById("xljc");
+        //     div.style.left = left + "%";
+        //     left += 13;
+        // }
+
+    });
+
+    function alertFunc() {
+        $.ajax({
+            url: '/filter/selTaskHandler',
+            method: 'post',
+            data: {},
+            success: function (res) {
+                if (res.Code == 0) {
+                    console.log(res.Reason);
+                    layui.use(['form', 'table', 'laydate'], function () {
+                        //单个使用
+                        layer.open({
+                            type: 1,
+                            title: '新报警',
+                            content: $("#popup"),
+                            offset: 'rb',
+                            area: ['310px', '150px'],
+                            shade: false,
+                            cancel: function (index, layero) {
+                                $("#popup").addClass("layui-hide");
+                            }, success: function (index, layero) {
+                                var audio = new Audio("/static/music/alarm.m4a");
+                                audio.play();
+                                $("#popup").removeClass("layui-hide");
+                                var type="";
+                                var index = 0;
+                                for(var i=0,len=res.Num; i<len; i++){
+                                    var t = "";
+                                    if(res.Reason[i]["AType"]=="cloths"){
+                                        t="闸门人脸识别";
+                                    }else if(res.Reason[i]["AType"]=="smoke"){
+                                        t="厂区烟雾监测";
+                                    }else if(res.Reason[i]["AType"]=="fire"){
+                                        t="漏水漏泥监测";
+                                    }else if(res.Reason[i]["AType"]=="boundary"){
+                                        t="高危区域监测";
+                                    }else if(res.Reason[i]["AType"]=="queue_count"){
+                                        t="人数超限监测";
+                                    }else if(res.Reason[i]["AType"]=="sleep_count"){
+                                        t="员工睡岗监测";
+                                    }
+                                    if(type.indexOf(t) == -1){
+                                        index++;
+                                        type += "["+t+"] ";
+                                    }
+                                    if(index >= 6){
+                                        break;
+                                    }
+                                }
+                                if(type != ""){
+                                    var t = res.Reason[0]["AType"];
+                                    $("#alarm_popup").html( type + "有新报警，请刷新查看</a>");
+                                }else{
+                                    $("#alarm_popup").html("有新报警，请刷新查看");
+                                }
+
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    }
+</script>

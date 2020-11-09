@@ -1,0 +1,138 @@
+<div class="layui-header">
+    <div class="layui-logo" style="width: 600px;text-align: left;margin-left: 20px">{{.SystemTitle}}</div>
+    <!-- 头部区域（可配合layui已有的水平导航） -->
+    <ul class="layui-nav layui-layout-right">
+        <li class="layui-nav-item">
+            <a href="javascript:;">
+                <i class="layui-icon layui-icon-username"></i>&nbsp;管理员
+            </a>
+            <dl class="layui-nav-child">
+                <dd>
+                    <a href="javascript:updatePwd()">修改密码</a>
+                </dd>
+                <dd>
+                    <a href="javascript:logout()">退出登录</a>
+                </dd>
+            </dl>
+        </li>
+    </ul>
+
+</div>
+<script>
+
+
+    layui.use(['layer','element'], function () {
+
+    });
+
+    function logout() {
+        layer.confirm('确认退出系统?', function(index){
+            $.ajax({
+                url: '/logout',
+                method: 'post',
+                data: {},
+                success: function (res) {
+                    window.location = "/login";
+                },
+                error: function (data) {
+                    layer.alert("服务器连接错误");
+                }
+            });
+            layer.close(index);
+        });
+    }
+
+    function updatePwd() {
+        $("#updatePwd").removeClass("layui-hide");
+        layer.open({
+            type: 1,
+            title: "密码修改",
+            area: ['500px', '320px'],
+            content: $("#updatePwd"),
+            cancel: function (index, layero) {
+                $("#updatePwd").addClass("layui-hide");
+                layer.close(index);
+            }
+        });
+        //密码修改
+        layui.use(['layer', 'form'], function () {
+            var form = layui.form;
+            form.on('submit(updatePwdfrom)', function (data) {
+                var password = data.field.newPwd;
+                // var testPassword = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]{12}$/;
+                // if (testPassword.test(password) == false) {
+                //     layer.alert("错误提示： 平台密码必须强制设置12位，包括大小写字母、数字、特殊符号！");
+                //     return;
+                // }
+                if (data.field.newPwd != data.field.confirmPwd) {
+                    layer.alert("两次输入密码不一致");
+                    return;
+                }
+                $.ajax({
+                    url: '/resetPwd',
+                    method: 'post',
+                    data: data.field,
+                    success: function (res) {
+                        if (res.Ret == 1) {
+                            layer.alert(res.Reason, function () {
+                                layer.closeAll();
+                            });
+                        } else {
+                            layer.alert(res.Reason);
+                        }
+                    },
+                    error: function (data) {
+                        layer.alert("服务器连接错误");
+                    }
+                });
+                return false;
+            });
+        });
+    }
+
+    function cancel() {
+        layer.closeAll();
+    }
+
+</script>
+<div style="background: white;display: none;" id="updatePwd">
+    <form class="layui-form" style="margin: 0 20px;" lay-filter="editcamera">
+        <input type="hidden" id="place_id" name="place_id">
+        <input type="hidden" id="code" value="0" name="code"><!--0注册1修改-->
+        <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+            <div class="layui-row">
+                <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                    <span>旧密码</span>
+                </div>
+                <div class="layui-col-md8 layui-col-lg8">
+                    <input name="oldPwd" id="" class="layui-input" type="text" placeholder="请输入旧密码"
+                           lay-verify="required"/>
+                </div>
+            </div>
+            <div class="layui-row" style="margin-top: 20px">
+                <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                    <span>新密码</span>
+                </div>
+                <div class="layui-col-md8 layui-col-lg8">
+                    <input name="newPwd" id="" class="layui-input" type="text" placeholder="请输入新密码"
+                           lay-verify="required"/>
+                </div>
+            </div>
+            <div class="layui-row" style="margin-top: 20px">
+                <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                    <span>确认新密码</span>
+                </div>
+                <div class="layui-col-md8 layui-col-lg8">
+                    <input name="confirmPwd" id="" class="layui-input" type="text" placeholder="请输入新密码"
+                           lay-verify="required"/>
+                </div>
+            </div>
+            <div style="text-align: center;margin-top: 20px">
+                <button type="button" class="layui-btn" lay-submit lay-filter="updatePwdfrom">保存</button>
+                <button type="button" class="layui-btn" onclick="cancel()">取消</button>
+            </div>
+        </div>
+
+
+    </form>
+</div>

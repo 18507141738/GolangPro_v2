@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{.SystemTitle}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <script src="/static/js/common.js"></script>
+    <link href="/static/css/video-js.css" rel="stylesheet">
+    <script src="/static/js/video.js"></script>
+    <script type="text/javascript" src="/static/js/YUVCanvas.js"></script>
+    <script type="text/javascript" src="/static/js/VJSPlayer.js"></script>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!-- TOP -->
+    <div class="layui-header">
+        <div class="layui-logo" style="width: 40%; text-align: left; padding-left: 20px;">{{.SystemTitle}}{{.organizeName}}</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <i class="layui-icon layui-icon-username"></i>&nbsp;{{.Name}}
+                </a>
+                <dl class="layui-nav-child">
+                    <dd>
+                        <a href="javascript:logout()">退出登录</a>
+                    </dd>
+                </dl>
+            </li>
+        </ul>
+    </div>
+    <div class="layui-side layui-bg-black" id="leftNav">
+        <div class="layui-side-scroll">
+            <!-- 左侧菜单 -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="nav">
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a href="javascript:;">报警列表</a>
+                    <dl class="layui-nav-child">
+{{/*                        <dd class=""><a href="javascript:window.location.href='/ws/workshop_unalarm';">今日报警</a></dd>*/}}
+{{/*                        <dd class="layui-this"><a href="javascript:window.location.href='/ws/workshop_alarm';">全部报警</a></dd>*/}}
+{{/*                        <dd class=""><a href="javascript:window.location.href='/hc/workshop_notationPage';">批注列表</a></dd>*/}}
+                        <dd class="" onclick="window.location.href='/hc/workshop_unalarm'"><a href="javascript:;">今日报警</a></dd>
+                        <dd class="layui-this" onclick="window.location.href='/hc/workshop_alarm'"><a href="javascript:;">全部报警</a></dd>
+                        <dd class="" onclick="window.location.href='/hc/workshop_notationPage'"><a href="javascript:;">批注列表</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="layui-body" style="">
+        <!-- 内容主体 -->
+        <div style="padding: 0 15px;">
+            <div class="layui-tab layui-tab-brief">
+                <blockquote class="layui-elem-quote font-weight">
+                    <span>报警总数：{{.sum}}</span>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span>已处理：<font style="color: lawngreen; font-weight: bold;">{{.num}}</font></span>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span>未处理：<font style="color: red; font-weight: bold;">{{.unnum}}</font></span>
+                </blockquote>
+            </div>
+            <div style="margin-top: 30px;">
+                <div class="layui-form">
+                    <label class="">报警状态：</label>
+                    <div class="layui-input-inline">
+                        <select id="alarmStatus" name="interest" lay-filter="alarmStatus">
+                            <option value="-1" selected="">全部</option>
+                            <option value="0">未处理</option>
+                            <option value="1">已处理</option>
+                        </select>
+                    </div>&nbsp;&nbsp;
+                    <label class="">报警时间：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="title" required lay-verify="required" placeholder="请选择报警时间" autocomplete="off" class="layui-input" id="dateTime">
+                    </div>&nbsp;&nbsp;
+                    <button class="layui-btn layui-btn-normal layui-btn-sm" onclick="search()"><i class="layui-icon-search layui-icon"></i>搜索</button>
+                </div>
+                <table class="layui-hide" id="alarmlist" lay-filter="demo">
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-footer" style="left: 0;text-align: center;">
+        <!-- 底部固定 -->
+        © 2019 行为科技（北京）有限公司
+    </div>
+
+</div>
+
+<div class="layui-hide" id="alermInfo">
+    <input type="hidden" id="alarm_video">
+    <div style="width:100%;">
+        <div style="float: right;width: 200px;height: 100%;">
+            <div style="width: 100%;text-align: center;height: 44px;line-height: 44px;">
+                <span style="padding: 0 5px">告警信息</span>
+            </div>
+            <div style="width: 100%;">
+                <p style="line-height: 24px;" id="organizeName"></p>
+                <p style="line-height: 24px;">报警时间：<font id="createTime"></font></p>
+                <p style="line-height: 24px;">报警类型：<font id="alarmType"></font></p>
+                <p style="line-height: 24px;">告警内容:<font id="content"></font></p>
+            </div>
+        </div>
+        <div class="layui-tab" style="margin-right: 200px;" lay-filter="alarmTab">
+            <ul class="layui-tab-title">
+                <li class="layui-this" lay-id="alarmTabpic">图片</li>
+                <li class="">视频</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <img src="" id="alarmFile" style="width:100%;max-height:80%" />
+                </div>
+                <div class="layui-tab-item">
+                    <div id="vieodiv">
+                        <div id="sdk_div">
+{{/*                            <canvas id="h_canvas" style="width: 480px;height: 270px" ondblclick="hfullscreen()"></canvas>*/}}
+                        </div>
+                        <div id="video_div" class="layui-hide">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-hide" id="alermHandle">
+    <div style="width:100%;margin-top: 20px;">
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">描述</label>
+                <div class="layui-input-block">
+                    <input type="hidden" id="alarmId"/>
+                    <textarea placeholder="请输入内容" id="dealContent" class="layui-textarea"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button class="layui-btn" lay-submit="" lay-filter="handleSubmit" onclick="dealAlarm()">立即提交</button>
+                    <button type="reset" class="layui-btn layui-btn-primary" onclick="reset()">重置</button>
+                    <button class="layui-btn layui-btn-danger" lay-submit="" onclick="wrongAlarm()">报警误报</button>
+                </div>
+            </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/static/js/jquery.js"></script>
+<script charset="utf-8" src="/static/layui/layui.js"></script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">处理</a>
+</script>
+<!--工具栏-->
+<script type="text/html" id="toolbarDemo">
+
+</script>
+<script>
+    var cameraCode = 1;
+    function reset(){
+        $("#dealContent").val("");
+    }
+
+    function tableReload(){
+        var table = layui.table;
+        table.reload("alarmlist")
+    }
+    //表单提交
+    layui.use('form', function() {
+        var form = layui.form;
+        //监听提交
+        form.on('submit(btnAdd)', function(data) {
+            layer.msg(JSON.stringify(data.field));
+            return false;
+        });
+    });
+    layui.use(['element', 'table', 'layer', 'laydate'], function() {
+        var table = layui.table;
+        var laydate = layui.laydate;
+        var  element= layui.element;
+
+        element.on('tab(alarmTab)', function(data){
+            var imgView = document.getElementsByClassName("layui-tab-content")[0];
+            var width = imgView.getBoundingClientRect().width-20,
+                height = width*720/1280 ;
+            console.log("w:"+width+" h:"+height);
+
+            if(data.index==0){
+                stopplayer();
+            }
+            if(data.index==1){
+                var playurl=$("#alarm_video").val();
+                if(playurl!=""&&playurl!=null){
+                    filePlayFunc(playurl);
+                }else{
+                    var h = '';
+                    h='<span>暂无短视频</span>';
+                    $("#vieodiv").empty();
+                    $("#vieodiv").append(h);
+                }
+            }
+        });
+
+        laydate.render({
+            elem: "#dateTime",
+            range: true
+        });
+        var pagetype = $("#alarmStatus").val();
+        var dateTime = $("#dateTime").val();
+        table.render({
+            url:'/hc/workshop_alarmList?a='+Math.random(),
+            elem: '#alarmlist',
+            id: 'alarmlist',
+            cellMinWidth: 80,
+            cols: [
+                [{
+                    field: 'id',
+                    title: '报警编号'
+                } //width 支持：数字、百分比和不填写。你还可以通过 minWidth 参数局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                    , {
+                    field: 'content',
+                    title: '报警内容'
+                }, {
+                    field: 'createtime',
+                    title: '报警时间'
+                }, {
+                    field: 'manageDesc',
+                    title: '处理意见'
+                }, {
+                    field: 'state',
+                    title: '报警状态',
+                    templet: function(d){
+                        if (d.state==0) {
+                            return '<span style=\'color:red\'>'+ "未处理" +'</span>'
+                        } else {
+                            return '<span style=\'color:green\'>'+ "已处理" +'</span>'
+                        }
+                    }
+                }, {
+                    field: 'file',
+                    title: '图片',
+                    hide: true
+                }, {
+                    field: 'operation',
+                    title: '操作',
+                    align: 'center',
+                    toolbar: '#barDemo'
+                }
+                ]
+            ],
+            where: {
+                dateTime:dateTime,
+                status: "-1"
+            },
+            parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                console.log(res);
+                return {
+                    "code": res.Code, //解析接口状态
+                    "data": res.Reason, //解析数据列表
+                    "count":res.Num
+                };
+            },
+            page: true
+        });
+        //监听工具条
+        table.on('tool(demo)', function(obj) {
+            var data = obj.data;
+            if(obj.event === 'detail') {
+                layer.open({
+                    type: 1,
+                    title: '报警信息查看',
+                    area: '700px',
+                    offset: '100px',
+                    content: $("#alermInfo"),
+                    success: function(layero, index) {
+                        document.getElementById("organizeName").innerHTML = "";
+                        document.getElementById("createTime").innerHTML = data.createtime;
+                        document.getElementById("alarmType").innerHTML = data.type;
+                        document.getElementById("content").innerHTML = data.content;
+                        document.getElementById("alarmFile").src = "http://"+ data.head+ data.file;
+                        // $("#alarm_video").val("http://"+ data.head+ data.video);
+                        if (data.video != "" && data.video != "/") {
+                            $("#alarm_video").val("http://"+ data.head+ data.video);
+                        }else{
+                            $("#alarm_video").val("");
+                        }
+                        $("#alermInfo").removeClass("layui-hide");
+
+                        element.tabChange('alarmTab', 'alarmTabpic');
+
+                        // if (data.videoCode == '0') {//h264
+                        //     console.log("h264")
+                        //     cameraCode = "0";
+                        //     $("#sdk_div").addClass("layui-hide");
+                        //     $("#video_div").removeClass("layui-hide");
+                        // }else{//h265
+                        //     console.log("h265")
+                            cameraCode = "1";
+                            $("#sdk_div").removeClass("layui-hide");
+                            $("#video_div").addClass("layui-hide");
+                        // }
+                    },
+                    cancel: function(index, layero) {
+                        $("#alermInfo").addClass("layui-hide");
+                        stopplayer();
+                    }
+                });
+            } else if(obj.event === 'edit') {
+                $("#alarmId").val(data.id);
+                layer.open({
+                    type: 1,
+                    title: '报警信息处理',
+                    area: '700px',
+                    offset: '100px',
+                    content: $("#alermHandle"),
+                    success: function(layero, index) {
+                        $("#alermHandle").removeClass("layui-hide");
+                    },
+                    cancel: function(index, layero) {
+                        $("#alermHandle").addClass("layui-hide");
+                        reset();
+                    }
+                });
+            }
+        });
+
+        $('.demoTable .layui-btn').on('click', function() {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        $('#addcamera').on('click', function() {
+            window.location.href="/hc/workshop_alarm";
+        });
+
+    });
+
+    // 处理告警信息
+    function dealAlarm() {
+        var alarmId = $("#alarmId").val();
+        var dealContent = $("#dealContent").val();
+        if ($.trim(dealContent) == '') {
+            layer.alert("请填写处理内容");
+            return;
+        }
+        $.ajax({
+            url: '/hc/workshop_dealalarm?a='+Math.random(),
+            method: 'get',
+            data: {
+                'alarmId':alarmId,
+                'dealContent':dealContent,
+                'alarm_status':1
+            },
+            success: function (res) {
+                if (res.Ret == 1) {
+                    reset();
+                    layer.closeAll();
+                    tableReload();
+                } else {
+                    layer.alert(res.Reason);
+                }
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+
+    // 误报处理
+    function wrongAlarm() {
+        var alarmId = $("#alarmId").val();
+        var dealContent = "信息误报！";
+        if ($.trim(dealContent) == '') {
+            layer.alert("请填写处理内容");
+            return;
+        }
+        $.ajax({
+            url: '/hc/workshop_dealalarm?a='+Math.random(),
+            method: 'get',
+            data: {
+                'alarmId':alarmId,
+                'dealContent':dealContent,
+                'alarm_status':2
+            },
+            success: function (res) {
+                if (res.Ret == 1) {
+                    location.reload();
+                } else {
+                    layer.alert(res.Reason);
+                    location.reload();
+                }
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+
+    function search() {
+        var table = layui.table;
+        var pagetype = $("#alarmStatus").val();
+        var dateTime = $("#dateTime").val();
+        table.reload('alarmlist', {
+            url: '/hc/workshop_alarmList?a='+Math.random(), //接口地址
+            where: { //设定异步数据接口的额外参数，任意设
+                dateTime:dateTime,
+                status: pagetype
+            }
+        });
+    }
+
+    // 退出登录
+    function logout() {
+        layer.confirm('确认退出系统?', function(index){
+            $.ajax({
+                url: '/logout',
+                method: 'post',
+                data: {},
+                success: function (res) {
+                    window.location.href = "/login";
+                },
+                error: function (data) {
+                    layer.alert("服务器连接错误");
+                }
+            });
+            layer.close(index);
+        });
+    }
+</script>
+<script>
+    layui.use('element', function() {
+        var element = layui.element;
+    })
+
+</script>
+
+<script>
+    var mcanvas = null;
+    var player = null;
+
+    //播放本地视频
+    function filePlayFunc(path) {
+        console.log(path)
+        if (cameraCode == "0") {
+            var h = '';
+            h += '<video style="text-align: center" id="example_video_1" class="video-js vjs-default-skin" controls  width="' + 480 + '"  height="' + 270 + '" data-setup="{}"> <source src="' + path + '" type="video/mp4"> </video>';
+            $("#video_div").append(h);
+            videojs("example_video_1").ready(function(){
+                var myPlayer = this;
+                myPlayer.play();
+            });
+        }else {
+            //close the player,if it opened!
+            // player.realStop();
+
+            var h = '<canvas id="h_canvas" style="width: 480px;height: 270px" width="480" height="270" ondblclick="hfullscreen()"></canvas>'
+            $("#sdk_div").empty();
+            $("#sdk_div").append(h);
+            mcanvas = document.getElementById("h_canvas");
+            mcanvas.style.backgroundColor = "#000000";
+            player = new VJSPlayer({"canvas" : mcanvas ,"width":480,"height":270});
+
+            //start play
+            var sni = {};//StreamNetInfo
+            sni.url = path;
+            sni.protocol = 1;  //1 文件 2海康，3大华
+            player.recordPlay(sni);
+        }
+
+    }
+
+    function stopplayer() {
+        if (cameraCode == "0") {
+            var videoPlayer = $("#example_video_1").get(0);
+            if (typeof (videoPlayer) != "undefined") {
+                var myPlayer = videojs('example_video_1');
+                myPlayer.dispose();
+            }
+        }else{
+            if (player!= null) {
+                player.realStop();
+            }
+        }
+    }
+</script>
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+.layui-table-cell {
+    font-size: 12px;
+}
+.layui-laypage .layui-laypage-skip {
+    color:#F5F5F5;
+}
+/*分页下拉框*/
+.layui-laypage-limits select {
+    background-color: transparent;
+    color: #F5F5F5;
+    border-radius: 5px;
+    border: 1px solid #00fcf9;
+    background: #2F4056;
+}
+.layui-laypage button, .layui-laypage input {
+    background-color: transparent;
+    color: #F5F5F5;
+}
+.layui-laypage a, .layui-laypage span {
+    color: #F5F5F5;
+}
+
+.layui-table,
+.layui-table-header,
+.layui-table thead tr,
+.layui-table-click
+{
+    color: white;
+    background: transparent;
+    border-top: 1px solid #007DDB;
+}
+.layui-table-header{
+    background: transparent;
+}
+
+.layui-table thead tr {
+    border-top: 0px;
+}
+
+.layui-table-hover,
+.layui-table tbody tr:hover {
+    background: #152f5b;
+    color: #65e0e3;
+}
+
+.layui-table, .layui-table-view {
+    margin: 0px;
+    border: 0px;
+}
+
+.layui-table td, .layui-table th, .layui-table-col-set, .layui-table-fixed-r, .layui-table-grid-down, .layui-table-header, .layui-table-page, .layui-table-tips-main, .layui-table-tool, .layui-table-total, .layui-table-view, .layui-table[lay-skin=line], .layui-table[lay-skin=row] {
+    border-width: 1px;
+    /* border-style: solid; */
+    border-color: #007DDB;
+}

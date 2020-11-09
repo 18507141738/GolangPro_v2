@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css" />
+    <link rel="stylesheet" href="/static/css/zTreeStyle/zTreeStyle.css"/>
+    <link rel="stylesheet" href="/static/css/formSelects-v4.css"/>
+</head>
+<script src="/static/js/jquery-3.3.1.min.js"></script>
+<script src="/static/layui/layui.js"></script>
+<script src="/static/js/jquery.ztree.all.js"></script>
+<style>
+    html,body{
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!-- 顶部 -->
+    {{template "config/commons/header.html" .}}
+    <!-- 菜单 -->
+    {{template "config/commons/menu.html" .}}
+    <div class="layui-body">
+        <div style="padding: 5px;">
+            <blockquote class="layui-elem-quote font-weight">组织管理</blockquote>
+        </div>
+        <div class="layui-row layui-col-space10" style="margin: 0 10px;">
+            <div class="layui-col-md4">
+                <fieldset class="layui-elem-field" style="max-height: 100%;">
+                    <legend>组织架构</legend>
+                    <div class="layui-card">
+                        <div class="layui-card-header">
+                            <button class="layui-btn layui-btn-xs" id="add-group" onclick="addO()"><i
+                                        class="layui-icon layui-icon-add-1"></i>添加
+                            </button>
+                            <button class="layui-btn layui-btn-xs layui-btn-normal" id="update-group" onclick="updateO()"><i
+                                        class="layui-icon layui-icon-edit"></i>修改
+                            </button>
+                            <button class="layui-btn layui-btn-xs layui-btn-danger" id="delete-group" onclick="deleO()"><i
+                                        class="layui-icon layui-icon-delete"></i>删除
+                            </button>
+                        </div>
+                        <div class="layui-card-body">
+                            <ul id="treeDemo" class="ztree"></ul>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="layui-col-md8">
+                <div>
+                    <table id="userList" lay-filter="userList"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/html" id="toolbar">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+            <button class="layui-btn layui-btn-warm layui-btn-sm" lay-event="edit">修改</button>
+            <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">删除</button>
+        </div>
+    </script>
+    <!-- 底部 -->
+    {{template "config/commons/footer.html" .}}
+</div>
+</body>
+<script type="text/javascript">
+    layui.config({
+        base:'/static/js/'
+    }).extend({
+        formSelects:'formSelects-v4'
+    });
+</script>
+<script>
+    organizationAddHtml = '<div style="width: 100%;" id="organizeAddView" data_type="0">\n' +
+        '\t\t<form lay-filter="formOrganize" class="layui-form" style="margin: 0 20px;">\n' +
+        '\t\t\t<input id="organize_id" name="organize_id" class="layui-hide" />\n' +
+        '\t\t\t<input id="organize_pId" name="organize_pId" class="layui-hide" />\n' +
+        '\t\t\t<input id="organize_level" name="organize_level" class="layui-hide" />\n' +
+        '\t\t\t<input id="pname" name="pname" class="layui-hide" />\n' +
+        '\t\t\t<input id="code" name="code" class="layui-hide" />\n' +
+        '\t\t\t<div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">\n' +
+        '\t\t\t\t<div class="layui-row">\n' +
+        '\t\t\t\t\t<div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">\n' +
+        '\t\t\t\t\t\t<span>组织名称</span>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="layui-col-md8 layui-col-lg8">\n' +
+        '\t\t\t\t\t\t<input id="organize_name" name="organize_name" class="layui-input" type="text" placeholder="请输入组织名称" lay-verify="required" />\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t</div>\n' +
+        '\t\t\t<div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">\n' +
+        '\t\t\t\t<div class="layui-row">\n' +
+        '\t\t\t\t\t<div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">\n' +
+        '\t\t\t\t\t\t<span>联系电话</span>\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t\t<div class="layui-col-md8 layui-col-lg8">\n' +
+        '\t\t\t\t\t\t<input id="phone" name="phone" class="layui-input" type="text" placeholder="请输入联系电话" lay-verify="required" />\n' +
+        '\t\t\t\t\t</div>\n' +
+        '\t\t\t\t</div>\n' +
+        '\t\t\t</div>\n' +
+        '\t\t\t<div style="text-align: center;margin:50px;">\n' +
+        '\t\t\t\t<button type="button" class="layui-btn" onclick="saveOrg()">保存</button>\n' +
+        '\t\t\t\t<button type="button" class="layui-btn" onclick="cancel()">取消</button>\n' +
+        '\t\t\t</div>\n' +
+        '\t\t</form>\n' +
+        '\t</div>'
+
+
+
+    function deleO() {
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+        var nodes = treeObj.getSelectedNodes();
+        if (nodes.length > 0) {
+            layer.confirm('确定要删除吗？', {
+                btn: ['确定','取消'] //按钮
+            }, function(){
+                layer.close();
+                $.ajax({
+                    url: '/config/delOrgData',
+                    method: 'post',
+                    data: {"id": nodes[0].id},
+                    dataType: 'JSON',
+                    success: function (res) {
+                        if(res.Ret=="1"){
+                            layer.alert(res.Reason);
+                            treeObj.removeNode(nodes[0]);
+
+                            var node = treeObj.getNodesByParam("pId", nodes.pId, null);
+                            layui.table.reload("userList");
+                        }else{
+                            layer.alert(res.Reason);
+                        }
+                    },
+                    error: function (data) {
+                        layer.alert("服务器连接错误");
+                    }
+                });
+            }, function(){
+            });
+        } else {
+            layer.alert("请先选择组织");
+        }
+    }
+
+    function updateO() {
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+        var nodes = treeObj.getSelectedNodes();
+        if (nodes.length > 0) {
+            organizeView(
+                '修改组织',
+                ['700px', '400px'],
+                '100px',
+                organizationAddHtml,
+                "1",
+                nodes[0]
+            )
+        } else {
+            layer.alert("请先选择组织");
+        }
+    }
+
+    function saveOrg() {
+        var organize_id = $("#organize_id").val();
+        var organize_level = $("#organize_level").val();
+        var code = $("#code").val();
+        var organize_name = $("#organize_name").val();
+        var organize_pId = $("#organize_pId").val();
+        var phone = $("#phone").val();
+        // alert(code);
+        $.ajax({
+            url: '/config/saveorgdata',
+            method: 'post',
+            data:  {
+                'organize_id' : organize_id,
+                'organize_level' :organize_level,
+                'code' : code,
+                'organize_name' : organize_name,
+                'organize_pId' : organize_pId,
+                'phone' : phone
+            },
+            success: function (res) {
+                if (res.Ret == 1) {
+                    getTreeList();
+                    layer.closeAll();
+                } else {
+                    layer.alert(res.Reason);
+                }
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+
+    function addO(){
+        var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+        var nodes = treeObj.getSelectedNodes();
+        if (nodes.length > 0) {
+            organizeView(
+                '添加组织',
+                ['700px', '400px'],
+                '100px',
+                organizationAddHtml,
+                "0",
+                nodes[0]
+            );
+        } else {
+            layer.alert("请先选择组织");
+        }
+    }
+
+    function hiddenView() {
+        var roleview = document.getElementById('roleview');
+        roleview.style.display = "none";
+        document.getElementById('zuquan').style.display = "none";
+    }
+
+    function organizeView(title,area,offset,content,code,node) {
+            console.log(node);
+            var form = layui.form;
+            layer.open({
+                type: 1,
+                title: title,
+                area: area,
+                offset: offset,
+                content: content,
+                cancel: function(index, layero) {
+                    layer.close(index);
+                },
+                success: function(index, lavero) {
+                    if(code == "0"){
+                        $("#code").val("0");
+                        form.val('formOrganize',{
+                            "code":0,
+                            "organize_id": "",
+                            "organize_name": "",
+                            "organize_pId": node.id,
+                            "pname": "",
+                            "organize_level": node.level,
+                            "phone": "",
+                        });
+                    }else {
+                        $("#code").val("1");
+                        form.val('formOrganize',{
+                            "code":1,
+                            "organize_id": node.id,
+                            "organize_name": node.name,
+                            "organize_pId": node.pId,
+                            "pname": node.pname,
+                            "organize_level": node.level,
+                            "phone": node.phone,
+                        });
+                    }
+
+                    form.render(null, "formOrganize");
+                }
+            });
+
+
+    }
+
+    layui.use(['element', 'table', 'tree', 'form', 'layer','formSelects'], function () {
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+        var formSelects = layui.formSelects;
+
+        form.render('select');
+        table.render({
+            elem: '#userList',
+            // url: '/organize/organize_queryMembers', //接口地址
+            data: [],
+            page: true,
+            toolbar: "#toolbar",
+            defaultToolbar: '',
+            method: "post",
+            cellMinWidth: 80,
+            cols: [
+                [{
+                    checkbox: true
+                },
+                    {
+                        field: 'name',
+                        title: '员工姓名',
+                        align: 'center',
+
+                    },
+                    {
+                        field: 'user',
+                        title: '用户名',
+                        align: 'center',
+                    },{
+                        field: 'mobile',
+                        title: '手机号码',
+                        align: 'center',
+                        templet: function (d) {
+                            return '<span>'+d.tele+'</span>';
+                        }
+                    },{
+                    field: 'type',
+                    title: '用户类型',
+                    align: 'center',
+                    templet: function(d){
+                        if(d.type=="1"){
+                            return '<span>'+ "普通用户" +'</span>'
+                        }else{
+                            return '<span>'+ "管理人员" +'</span>'
+                        }
+                    }
+                }
+                ]
+            ],
+            parseData: function (res) {
+                return {
+                    "code": res.Code, //解析接口状态
+                    "data": res.Reason, //解析数据列表
+                    "count": res.Num
+                }
+            }
+        });
+        //头工具栏事件
+        table.on('toolbar(userList)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'add':
+
+                    var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+                    var nodes = treeObj.getSelectedNodes();
+                    if (nodes.length > 0) {
+
+                        form.val('formUser',{
+                            "member_id":"",
+                            "member_code":"0",
+                            "member_name":"",
+                            "member_user":"",
+                            "member_pass":"",
+                            "member_tele":"",
+                            "email":"",
+                        })
+
+                        formSelects.value("jur",[])
+
+                        layer.open({
+                            type: 1,
+                            title: "成员添加",
+                            area: ['700px','550px'],
+                            offset: 'auto',
+                            content: $("#roleview"),
+                            cancel: function(index, layero) {
+                                layer.close(index);
+                                $("#roleview").addClass("layui-hide");
+                            },
+                            success: function(index, lavero) {
+                                $("#roleview").removeClass("layui-hide");
+                                $("#member_organizeId").val(nodes[0].id)
+                            }
+                        });
+
+                    } else {
+                        layer.alert("请先选择组织");
+                    }
+
+                    break;
+                case 'edit':
+                    if (checkStatus.data.length != 1) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择单条数据操作'
+                        });
+                    }else{
+                        layer.open({
+                            type: 1,
+                            title: "修改",
+                            area: ['700px','500px'],
+                            offset: 'auto',
+                            content: $("#roleview"),
+                            cancel: function(index, layero) {
+                                layer.close(index);
+                                $("#roleview").addClass("layui-hide");
+                            },
+                            success: function(index, lavero) {
+
+                                $("#roleview").removeClass("layui-hide");
+
+                                var jsObject = checkStatus.data;
+                                console.log(JSON.stringify(jsObject));
+                                form.val('formUser',{
+                                    "member_organizeId":jsObject[0].organize_id,
+                                    "member_id":jsObject[0].admin_id,
+                                    "member_code":"1",
+                                    "member_name":jsObject[0].admin_name,
+                                    "member_user":jsObject[0].admin_user,
+                                    "member_pass":"",
+                                    "member_tele":jsObject[0].tele,
+                                    // "email":jsObject[0].Email,
+                                    "type":jsObject[0].type
+                                });
+                                var jurs = jsObject[0].jurisdiction;
+
+                                if (jurs == "" || jurs == null) {
+                                    jurs = [];
+                                }else{
+                                    jurs = jurs.split(",");
+                                }
+
+                                formSelects.value("jur",jurs)
+                            }
+                        });
+
+                    }
+                    break;
+                case 'del':
+                    if (checkStatus.data.length < 1) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择数据操作'
+                        });
+                        return
+                    }
+                    var member_ids = "";
+                    for (var index in checkStatus.data) {
+                        // arr.push(checkStatus.data[index].id);
+                        // alert(checkStatus.data[index].id);
+                        member_ids += checkStatus.data[index].admin_id + ",";
+                    }
+
+                    $.ajax({
+                        url: "/config/delUser",
+                        method: 'post',
+                        data: {"member_ids": member_ids},
+                        dataType: 'JSON',
+                        success: function (res) {
+                            if(res.Ret=="1"){
+                                layer.msg("删除成功！", {icon:1});
+                                updateUserList();
+                            }else{
+                                layer.alert(res.Reason);
+                            }
+                        },
+                        error: function (data) {
+                            layer.alert("服务器连接错误");
+                        }
+                    });
+
+                    break;
+
+            }
+        });
+        form.on('submit(user)',function (data) {
+            var url = "/config/saveUser";
+            if (data.field.member_code != "0"){
+                url = "/config/editUser";
+            }
+
+            var password = data.field.member_pass;
+            // var testPassword = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]{12}$/;
+            // if (password != "" && testPassword.test(password) == false) {
+            //     layer.alert("错误提示： 平台密码必须强制设置12位，包括大小写字母、数字、特殊符号！");
+            //     return;
+            // }
+            $.ajax({
+                url:url,
+                method: "post",
+                dataType: "json",
+                data: data.field,
+                success: function(res){
+                    if (res.Ret == "1") {
+                        updateUserList();
+                        layer.closeAll();
+                    }else {
+                        layer.alert(res.Reason);
+                    }
+                },
+                error: function (data) {
+                    layer.alert("服务器连接异常");
+                }
+            })
+
+        });
+
+    });
+
+    function saveUser() {
+        var member_organizeId = $("#member_organizeId").val();
+        var member_name = $("#member_name").val();
+        var member_user = $("#member_user").val();
+        var member_pass = $("#member_pass").val();
+        var member_tele = $("#member_tele").val();
+        var type = $("#type").val();
+        console.log("member_organizeId:" + member_organizeId + "    member_name:" + member_name + "   member_user:" + member_user + "  member_pass:" + member_pass + "  type:" + type)
+        $.ajax({
+            url: "/config/saveUser",
+            method: 'post',
+            data: {
+                'member_organizeId' : member_organizeId,
+                'member_name' : member_name,
+                'member_user' : member_user,
+                'member_pass' : member_pass,
+                'member_tele' : member_tele,
+                'type' : type
+            },
+            dataType: 'JSON',
+            success: function (res) {
+                if(res.Ret=="1"){
+                    updateUserList();
+                    layer.closeAll();
+                }else{
+                    layer.alert(res.Reason);
+                }
+            },
+            error: function (data) {
+                parent.tools.sysAlert("服务器连接错误");
+            }
+        });
+    }
+
+    function userView (title,area,offset,content,node) {
+        var form = layui.form;
+        layer.open({
+            type: 1,
+            title: title,
+            area: area,
+            offset: offset,
+            content: content,
+            cancel: function(index, layero) {
+                layer.close(index);
+            },
+            success: function(index, lavero) {
+                $("#member_organizeId").val(node.id);
+                form.render(null, "formUser");
+            }
+        });
+        form.verify({
+        });
+        form.on('submit(user)', function (data) {
+
+            $.ajax({
+                url: '/set/organize/organize_addMember',
+                method: 'post',
+                data: data.field,
+                dataType: 'JSON',
+                success: function (res) {
+
+                    if (res.Ret == 1) {
+                        layer.alert(res.Reason,function () {
+                            layer.closeAll();
+
+                            $(".layui-tab-item.layui-show").find("iframe")[0].contentWindow.updateUserList();
+                        });
+                    } else {
+                        layer.alert(res.Reason);
+                    }
+                },
+                error: function (data) {
+                    layer.alert("服务器连接错误");
+                }
+            });
+            return false;
+        });
+    }
+
+
+    function updateUserList() {
+        var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+        var treeNode = zTree.getSelectedNodes();
+        if (treeNode.length > 0) {
+            layui.table.reload('userList', {
+                url: "/config/selUserForOrgId",
+                where: {
+                    "organize_id": treeNode[0].id,
+                }
+            });
+        }
+    }
+
+    getTreeList();
+
+    var setting = {
+        view: {
+            dblClickExpand: false,
+            showLine: false,
+            selectedMulti: false
+        },
+        data: {
+            keep: {
+                parent: true
+            },
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            onClick: function (treeId, treeNode) {
+                updateUserList();
+            }
+        }
+    }
+
+    function getTreeList() {
+        $.ajax({
+            url: '/config/selOrgTree',
+            method: 'post',
+            data: "",
+            dataType: 'JSON',
+            success: function (res) {
+                if(res.Code == "1"){
+                    $.fn.zTree.init($("#treeDemo"), setting, res.Reason);
+                    var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+                    zTree.expandAll(true);
+                }
+            },
+            error: function (data) {
+                tools.sysAlert("服务器连接错误");
+            }
+        });
+    }
+
+    function cancel() {
+        closeAll();
+    }
+
+    function closeAll() {
+        layer.closeAll();
+        hiddenView();
+    }
+</script>
+
+
+<div style="width: 100%;" class="layui-hide" id="roleview">
+
+    <div class="layui-row">
+        <div class="layui-col-lg12">
+            <form class="layui-form" lay-filter="formUser" style="margin: 0 20px;">
+                <input id="member_organizeId" name="member_organizeId" type="text" class="layui-hide" />
+                <input id="member_id" name="member_id" type="text" class="layui-hide" />
+                <input id="member_code" name="member_code" type="text" value="0" class="layui-hide" />
+                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                    <div class="layui-row">
+                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                            <span>成员名称</span>
+                        </div>
+                        <div class="layui-col-md8 layui-col-lg8">
+                            <input class="layui-input" name="member_name" type="text" placeholder="请输入员工名称" lay-verify="required"/>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                    <div class="layui-row">
+                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                            <span>联系号码</span>
+                        </div>
+                        <div class="layui-col-md8 layui-col-lg8">
+                            <input class="layui-input" name="member_tele" type="text" placeholder="请输入手机号码" lay-verify="required"/>
+                        </div>
+                    </div>
+                </div>
+                {{/*                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">*/}}
+                {{/*                    <div class="layui-row">*/}}
+                {{/*                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">*/}}
+                {{/*                            <span>邮箱</span>*/}}
+                {{/*                        </div>*/}}
+                {{/*                        <div class="layui-col-md8 layui-col-lg8">*/}}
+                {{/*                            <input class="layui-input" name="email" type="text" placeholder="请输入员工邮箱" lay-verify="required"/>*/}}
+                {{/*                        </div>*/}}
+                {{/*                    </div>*/}}
+                {{/*                </div>*/}}
+                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                    <div class="layui-row">
+                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                            <span>登录账号</span>
+                        </div>
+                        <div class="layui-col-md8 layui-col-lg8">
+                            <input class="layui-input" name="member_user" type="text" placeholder="请输入登录账号" lay-verify="required"/>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                    <div class="layui-row">
+                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                            <span>登录密码</span>
+                        </div>
+                        <div class="layui-col-md8 layui-col-lg8">
+                            <input class="layui-input" name="member_pass" type="password" lay-verify="member_pass" placeholder="请输入登录密码" />
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                    <div class="layui-row">
+                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                            <span>账号类型</span>
+                        </div>
+                        <div class="layui-col-md8 layui-col-lg8">
+                            <select id="type" name="type" class="layui-select">
+                                <option value="1" selected>普通类型</option>
+                                <option value="2">管理类型</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                    <div class="layui-row">
+                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                            <span>权限分配</span>
+                        </div>
+                        <div class="layui-col-md8 layui-col-lg8">
+                            <select id="jur" name="jur" class="layui-select" xm-select="jur" lay-filter="jur">
+                                <option value="0">着装监控</option>
+                                <option value="1">烟雾监测</option>
+                                <option value="2">火焰监测</option>
+                                <option value="3">区域入侵</option>
+                                <option value="4">离岗监测</option>
+                                <option value="5">睡岗监测</option>
+                                <option value="7">设备管理</option>
+                                <option value="8">成员管理</option>
+                                <option value="9">短信通知</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center;margin:50px;">
+                    <button type="button" class="layui-btn" lay-submit lay-filter="user">保存</button>
+                    <button type="button" class="layui-btn" onclick="cancel()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</html>

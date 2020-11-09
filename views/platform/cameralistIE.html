@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" media="screen" href="/static/css/platform.css">
+    <link rel="stylesheet" href="/static/css/zTreeStyle/zTreeStyle.css"/>
+    <link rel="stylesheet" href="/static/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/static/css/border.css"/>
+    <link rel="stylesheet" href="/static/css/table.css">
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/layui/layui.js"></script>
+    <script src="/static/js/jquery.ztree.all.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/ocxVideo.js"></script>
+    <style>
+        .borderdiv{
+            border: 1px solid #00ccff;
+            border-radius:5px;
+            box-shadow:rgb(0,59,91) 0px 0px 20px inset;
+            height: 60%;
+            background: rgba(255,255,255,0.05);
+            position:relative;
+            margin: 20px;
+        }
+        .ztree li a {
+            color: #65e0e3;
+        }
+        .layui-table-tool {
+            background: transparent;
+            border: 0px;
+        }
+        /*下拉框样式*/
+        .commontext {
+            color: #65e0e3;
+            font-size: 12px;
+            height: 30px;
+        }
+
+        .layui-form-label {
+            float: left;
+            display: block;
+            padding: 5px 15px;
+            width: 80px;
+            font-weight: 400;
+            line-height: 20px;
+            text-align: right;
+        }
+
+        .layui-form input {
+            background-color: transparent;
+            border-radius: 5px;
+            color: white;
+            height: 30px;
+            border: 1px solid #00fcf9;
+            background: transparent;
+        }
+
+        .layui-form-select dl {
+            background-color: #2F4056;
+        }
+
+        .layui-form-select dl dd {
+            color: white;
+            background: #2F4056;
+        }
+
+        .layui-form-select dl dd:hover {
+            background: #00ccff;
+        }
+
+        /*修改提示文字颜色 */
+        input::-webkit-input-placeholder {
+            color: white;
+            font-size: 12px;
+        }
+        .layui-layer-page .layui-layer-content {
+            background: #152f5b;
+            color: #ffffff;
+            border-top: 1px solid #6076ad;
+            border-bottom: 1px solid #6076ad;
+            border-left: 1px solid #6076ad;
+            border-right: 1px solid #6076ad;
+            border-radius: 5px;
+        }
+        .layui-input {
+            background-color: transparent;
+            color: #FFF;
+            border: 1px solid #00fcf9;
+            border-radius: 5px;
+            height: 35px;
+        }
+        .btn-submit {
+            border: 1px solid #00fcf9;
+            width: 100%;
+            height: 30px;
+            line-height: 30px;
+            background: #FFB800;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 100%;background: url(/static/images/platform/index_bg.jpg) no-repeat; min-height: 100%;">
+    <!-- 顶部 -->
+    {{template "platform/commons/header.html" .}}
+    <div class="layui-row">
+        <div class="layui-rol-md12" style="margin-bottom: 20px">
+            <span style="color: #65e0e3; margin-left: 20px; font-size: 12px; ;">
+                <a href="/platform/centerpage" style="color: #65e0e3;">个人中心</a>&nbsp;>&nbsp;<a href="/platform/centerhostmanagerpage" style="color: #65e0e3;">主机列表</a> &nbsp;>&nbsp;摄像头列表
+            </span>
+        </div>
+
+        <div class="layui-col-md12">
+            <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+                    <div style="border-image: url(/static/images/img_titile_bg.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                        <div class="h-table" style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                            <div class="h-cell">
+                                摄像机列表
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+                <input id="curr" class="layui-hide" type="text" value="1"/>
+                <div style="top: 62px;bottom: 0px;left: 5px;right: 5px;">
+                    <div style="width: 100%;height: 50px;line-height: 50px;margin-bottom: -10px;">
+                    </div>
+                    <div class="layui-row" style="height: 100%">
+                        <div class="layui-col-md12">
+                            <div class="layui-col-md12">
+                                <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                                    <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                                    <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                                    <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                                    <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+                                    <table id="cameraList" lay-filter="cameraList"></table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div id="testView" class="layui-hide">
+    <object id="OcxViewer2" classid="CLSID:B16A9F87-73B2-47F1-86F0-88162BBE856A" width="480" height="270"></object>
+</div>
+
+<script type="text/html" id="toolbar">
+    <div class="layui-row">
+        <div class="layui-col-md3 layui-col-sm3 layui-col-xs3">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="add">添加</button>
+                <button class="layui-btn layui-btn-warm layui-btn-sm" lay-event="edit">修改</button>
+                <button class="layui-btn layui-btn-sm" lay-event="start">启用</button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="stop">停用</button>
+                <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">删除</button>
+            </div>
+        </div>
+    </div>
+</script>
+<script type="text/html" id="bar">
+    {{/*    <a class="layui-btn layui-btn-xs" lay-event="fp">分配人员</a>*/}}
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="set">功能配置</a>
+</script>
+<script type="text/javascript">
+    layui.config({
+        base:'/static/js/'
+    }).extend({
+        formSelects:'formSelects-v4'
+    });
+</script>
+<script>
+
+    var tableUser = '<div id="tableUser"  style="text-align: center;margin-top: 20px;">\n' +
+        '\t\t<div id="transfer1"></div>\n' +
+        '\t</div>';
+
+    function getParentHid() {
+        var hId ={{.hostID}}
+        return hId.toString();
+    }
+
+    function getCURR(){
+        return $("#curr").val();
+    }
+    function tableReload() {
+        var table = layui.table;
+        table.reload('cameraList', {});
+    }
+
+    function cameraSwicth(code, ids) {
+        var table = layui.table;
+        $.ajax({
+            url: '/platform/setCameraStatus',
+            method: 'post',
+            data: {"code": code, "ids": ids},
+            dataType: 'JSON',
+            success: function (res) {
+                if (res.Ret == 1) {
+                    layer.alert(res.Reason, {closeBtn:0}, function () {
+                        layer.closeAll();
+                        table.reload('testReload');
+                    });
+                } else {
+                    layer.alert(res.Reason);
+                }
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+
+    var selectUsers = [];
+    layui.config({base:'/static/layui/lay/tablePlug/'}).use(['element', 'table', 'transfer', 'form','tablePlug'], function () {
+        var table = layui.table;
+        var transfer = layui.transfer;
+        var form = layui.form;
+        var tablePlug = layui.tablePlug;
+        tablePlug.smartReload.enable(true);
+
+
+        //监听提交
+        form.on('submit(formDemo)', function (data) {
+            // alert(JSON.stringify(data.field));
+            $.ajax({
+                url: '/platform/saveCamera',
+                method: 'post',
+                data: data.field,
+                dataType: 'JSON',
+                success: function (res) {
+                    if (res.Ret == 1) {
+                        layer.alert(res.Reason, function () {
+                            layer.closeAll();
+                            // hiddenView();
+                            var table = layui.table;
+                            table.reload('testReload');
+                            // window.location.reload();//修改成功后刷新父界面
+                        });
+                    } else {
+                        layer.alert(res.Reason);
+                    }
+                },
+                error: function (data) {
+                    layer.alert("服务器连接错误");
+                }
+            });
+            return false;
+        });
+
+        table.render({
+            elem: '#cameraList',
+            url: '/platform/selCameraList', //接口地址
+            where: {
+                hostId: getParentHid(),
+                camaraName: '',
+            },
+            page: {
+                curr: getCURR()
+            },
+            id:"testReload",
+            toolbar: "#toolbar",
+            method:"post",
+            smartReloadModel: false,
+            defaultToolbar: '',
+            cellMinWidth: 80,
+            loading: false,
+            limits : [5,10,20],
+            cols: [
+                [{
+                    checkbox: true,
+                    width: 80
+                },
+                    {
+                        field: 'camera_title',
+                        title: '摄像机名',
+                        align: 'center',
+                    },
+                    {
+                        field: 'camera_location',
+                        title: '摄像机位置',
+                        align: 'center',
+                    },
+                    {
+                        field: 'width',
+                        title: '视频长度',
+                        align: 'center',
+                    },
+                    {
+                        field: 'height',
+                        title: '视频宽度',
+                        align: 'center',
+                    },
+                    {
+                        field: 'create_time',
+                        title: '添加时间',
+                        align: 'center',
+                    },
+                    {
+                        field: 'cdconfig',
+                        title: '摄像机ip',
+                        align: 'center',
+                    }, {
+                    field: 'camera_function_type',
+                    title: '隶属功能',
+                    align: 'center',
+                    templet: function (d) {
+                        if (d.camera_function_type == "cloths") {
+                            return '<span>' + "着装监控" + '</span>'
+                        }
+                        if (d.camera_function_type == "smoke") {
+                            return '<span>' + "烟雾监测" + '</span>'
+                        }
+                        if (d.camera_function_type == "fire") {
+                            return '<span>' + "火焰监测" + '</span>'
+                        }
+                        if (d.camera_function_type == "boundary") {
+                            return '<span>' + "区域入侵" + '</span>'
+                        }
+                        if (d.camera_function_type == "queue_count"||d.camera_function_type == "person_count") {
+                            return '<span>' + "离岗监测" + '</span>'
+                        }
+                        if (d.camera_function_type == "sleep_count") {
+                            return '<span>' + "睡岗监测" + '</span>'
+                        }
+                        // if (d.camera_function_type == "leakage") {
+                        //     return '<span>' + "泄漏监测" + '</span>'
+                        // }
+                    }
+                },
+                    {
+                        field: 'switch_c',
+                        title: '状态',
+                        align: 'center',
+                        templet: function (d) {
+                            if (d.switch_c == "on") {
+                                return '<span style="color:green">' + "启用" + '</span>'
+                            } else {
+                                return '<span style="color:#FF5722">' + "停用" + '</span>'
+                            }
+                        }
+                    },
+                    {
+                        title: '操作',
+                        align: 'center',
+                        toolbar: '#bar',
+                        width: 160
+                    }
+                ]
+            ],
+            done: function(res,curr,count){
+                // if(($("#curr").val()==""||$("#curr").val()=="1") && $("#curr").val() != "2"){
+                    $("#curr").val(curr);
+                // }
+
+
+            },
+            parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                console.log(res);
+                return {
+                    "code": res.Code, //解析接口状态
+                    "data": res.Reason, //解析数据列表
+                    "count": res.Num
+                };
+            }
+        });
+        var $ = layui.$, active = {
+            reload: function () {
+
+                var camera_name = $("#cameraName").val();
+                //执行重载
+                table.reload('testReload', {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        cameraName: camera_name
+                    }
+                }, 'data');
+            }
+        };
+        $('.layui-inline .layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        //头工具栏事件
+        table.on('toolbar(cameraList)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            // alert("hid2:"+getParentHid());
+            switch (obj.event) {
+                case 'add':
+                    $("#mcode").val("0");
+                    $("#host_id").val(getParentHid());
+                    form.val('editcamera', {
+                        "TitleName": "",
+                        "CameraNub": "",
+                        "CdConfig": "",
+                        "LocaTion": "",
+                        "place_id":"",
+                        "function_type": "",
+                        "videoCode": "0",
+                        "width": "",
+                        "height": "",
+                        "algorithm_url":"",
+                        "algorithm_width":"",
+                        "algorithm_height":"",
+                    });
+                    layer.open({
+                        type: 1,
+                        title:"",
+                        offset:'100px',
+                        area:'700px',
+                        content: $("#view"),
+                        cancel: function(index, layero) {
+                            layer.close(index);
+                            $("#view").addClass("layui-hide");
+                        },
+                        success: function(index, layero) {
+                            $("#view").removeClass("layui-hide");
+                            $.ajax({
+                                url: '/platform/selPlace',
+                                method: 'post',
+                                data: "",
+                                dataType: 'JSON',
+                                success: function (res) {
+                                    var data=res.Reason;
+                                    $("#custom_id").empty();
+                                    $.each(data, function (index, item) {
+                                        if (index == 0){
+                                            $("#place_id").val(item.place_id);
+                                            $("#LocaTion").val(item.place_name);
+                                        }
+                                        $("#custom_id").append('<option value="'+item.place_id+","+item.place_name+'">'+item.place_name+'</option>');
+
+                                    });
+                                    form.render('select','editcamera');
+                                },
+                                error: function (data) {
+                                    layer.alert("服务器连接错误");
+                                }
+                            });
+                        }
+                    });
+                    break;
+                case 'edit':
+                    if (checkStatus.data.length != 1) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择单条数据操作'
+                        });
+                    } else {
+                        var jsObject = JSON.parse(JSON.stringify(checkStatus.data));
+                        if(jsObject[0].switch=="on"){
+                            layer.alert("请先停用摄像头再进行操作");
+                            return;
+                        }
+                        var jsObject = checkStatus.data;//JSON.parse(JSON.stringify(checkStatus.data));
+                        $("#mcode").val("1");
+                        $("#camera_id").val(jsObject[0].camera_id);
+                        $("#host_id").val(jsObject[0].host_id);
+                        var node=jsObject[0];
+                        layer.open({
+                            type: 1,
+                            title: "",
+                            offset:'100px',
+                            area:'700px',
+                            // area: ['700px','650px'],
+                            content: $("#view"),
+                            cancel: function(index, layero) {
+                                layer.close(index);
+                                $("#view").addClass("layui-hide");
+                            },
+                            success: function(index, layero) {
+                                $("#view").removeClass("layui-hide");
+                                $.ajax({
+                                    url: '/platform/selPlace',
+                                    method: 'post',
+                                    data: "",
+                                    dataType: 'JSON',
+                                    success: function (res) {
+                                        var data=res.Reason;
+                                        $("#custom_id").empty();
+                                        $.each(data, function (index, item) {
+                                            if (jsObject[0].place_id == item.place_id){
+                                                $("#custom_id").append('<option value="'+item.place_id+","+item.place_name+'" selected>'+item.place_name+'</option>');
+                                            }else{
+                                                $("#custom_id").append('<option value="'+item.place_id+","+item.place_name+'">'+item.place_name+'</option>');
+                                            }
+
+                                        });
+                                        // form.render('select','editcamera');
+                                        form.val('editcamera', {
+                                            "TitleName": node.camera_title,
+                                            "CameraNub": node.cameraNub,
+                                            "CdConfig": node.cdconfig,
+                                            "LocaTion": node.camera_location,
+                                            "function_type": node.camera_function_type,
+                                            "place_id":node.place_id,
+                                            "videoCode": node.videoCode == "1"?"1":"0",
+
+                                            "width":node.width,
+                                            "height":node.height,
+                                            "algorithm_url":node.algorithm_url,
+                                            "algorithm_width":node.algorithm_width,
+                                            "algorithm_height":node.algorithm_height,
+                                        });
+                                    },
+                                    error: function (data) {
+                                        layer.alert("服务器连接错误");
+                                    }
+                                });
+
+                            }
+                        });
+
+                    }
+                    break;
+                case 'start':
+                    if (checkStatus.data.length == 0) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择要开启的摄像头'
+                        });
+                        return;
+                    }
+                    layer.closeAll();
+                    var array = checkStatus.data;
+                    var arrParse = array;
+                    var ids = "";
+                    for (var i = 0; i < arrParse.length; i++) {
+                        if (arrParse[i].status == "0") {
+                            layer.open({
+                                title: '温馨提示',
+                                content: '请先对摄像机('+arrParse[i].camera_title+')功能配置后再启用'
+                            });
+                            return;
+                        }
+                        ids += arrParse[i].camera_id + ",";
+                    }
+                    cameraSwicth("1", ids);
+                    break;
+                case 'stop':
+                    if (checkStatus.data.length == 0) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择要停用的摄像头'
+                        });
+                        return;
+                    }
+                    layer.closeAll();
+                    var array = checkStatus.data;
+                    var arrParse = array;
+                    var ids = "";
+                    for (var i = 0; i < arrParse.length; i++) {
+                        ids += arrParse[i].camera_id + ",";
+                    }
+                    cameraSwicth("0", ids);
+                    break;
+                case 'del':
+                    if (checkStatus.data.length == 0) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择要删除的数据'
+                        });
+                        return;
+                    }
+                    var jsObject = JSON.parse(JSON.stringify(checkStatus.data));
+                    if(jsObject[0].switch=="on"){
+                        layer.alert("请先停用摄像头再进行操作");
+                        return;
+                    }
+                    var array = checkStatus.data;
+                    var arrParse = array;
+                    var ids = "";
+                    for (var i = 0; i < arrParse.length; i++) {
+                        ids += arrParse[i].camera_id + ",";
+                    }
+                    var param = {"param": ids};
+                    layer.open({
+                        title: "删除",
+                        content: "确认删除该摄像头",
+                        btn: ["确认","取消"],
+                        yes :function(index, layero){
+                            $.ajax({
+                                url: '/platform/delCameraData',
+                                method: 'post',
+                                data: param,
+                                dataType: 'JSON',
+                                success: function (res) {
+                                    if (res.Ret == 1) {
+                                        layer.alert(res.Reason, {closeBtn:0}, function () {
+                                            layer.closeAll();
+                                            var table = layui.table;
+                                            table.reload('testReload', {
+                                                page: {
+                                                    curr: 1 //重新从第 1 页开始
+                                                }
+                                            });
+                                        });
+                                    } else {
+                                        layer.alert(res.Reason);
+                                    }
+                                },
+                                error: function (data) {
+                                    layer.alert("服务器连接错误");
+                                }
+                            });
+                        },
+                        btn2  :function(index, layero){
+                            layer.close(index);
+                        }
+                    });
+                    break;
+                case 'table_export':
+                    exportFile()
+                    break;
+            }
+        });
+        /**
+         * by yutons
+         * Array.from() 非常方便的将一个类数组的集合 ==》 数组，直接使用数组身上的方法。例如：常用的map，foreach…
+         * 但是，问题来了，IE不识别Array.from这个方法。所以写了它兼容IE的写法。
+         */
+        if (!Array.from) {
+            Array.from = function (el) {
+                return Array.apply(this, el);
+            }
+        }
+
+        table.on('tool(cameraList)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'set') {
+                if(data.switch=="on"){
+                    layer.alert("请先停用摄像头再进行操作");
+                    return;
+                }
+
+                // 周界监测
+                if (data.camera_function_type == "boundary") {
+                    window.location.href = "/platform/ocx/boundaryConfigPage?id=" + data.camera_id + "&function_type=" + data.camera_function_type;
+                }
+                // 着装监测
+                if (data.camera_function_type == "cloths") {
+                    window.location.href = "/platform/ocx/clothsConfigPage?id=" + data.camera_id + "&function_type=" + data.camera_function_type;
+                }
+                // 睡岗监测
+                if (data.camera_function_type == "sleep_count") {
+                    window.location.href = "/platform/ocx/sleep_count?id=" + data.camera_id + "&function_type=" + data.camera_function_type;
+                }
+                // 离岗监测
+                if (data.camera_function_type == "queue_count") {
+
+                    window.location.href = "/platform/ocx/leave_count?id=" + data.camera_id + "&function_type=" + data.camera_function_type;
+                }
+                if (data.camera_function_type == "smoke") {
+                    window.location.href = "/platform/ocx/smokepage?id=" + data.camera_id + "&function_type=" + data.camera_function_type;
+                }
+                if (data.camera_function_type == "fire") {
+                    window.location.href = "/platform/ocx/fireworkpage?id=" + data.camera_id + "&function_type=" + data.camera_function_type;
+                }
+                // if (data.camera_function_type == "leakage") {
+                //     window.location.href = "/platform/ocx/leakage?id=" + data.camera_id + "&function_type=" + data.camera_function_type;
+                // }
+            }
+        });
+
+        table.render({
+            elem: '#userList',
+            //url: '', //接口地址
+            page: true,
+            //height: 'full-200',
+            toolbar: "",
+            defaultToolbar: '',
+            // data: data,
+            cellMinWidth: 80,
+            height: 450,
+            cols: [
+                [{
+                    checkbox: true
+                },
+                    {
+                        field: 'id',
+                        title: 'ID',
+                        align: 'center',
+                        hide: true
+                    },
+                    {
+                        field: 'name',
+                        title: '员工名称',
+                        align: 'center',
+                    },
+                    {
+                        field: 'user',
+                        title: '账号名称',
+                        align: 'center',
+                    }
+                ]
+            ],
+        });
+
+        form.on('select(place)', function (data) {
+            console.log(data)
+            var v = data.value;
+            var arr = v.split(",");
+            var place_id = arr[0];
+            var place_name = arr[1];
+            $("#place_id").val(place_id);
+            $("#LocaTion").val(place_name);
+        });
+    });
+
+
+    function getUser(id) {
+        var us = [];
+        for (var index in users) {
+            var user = users[index];
+
+            if (user["pId"] == id) {
+                us.push(user)
+            }
+
+        }
+        return us;
+    }
+    function cancel() {
+        layer.closeAll();
+    }
+
+
+
+    function yanzheng() {
+        $("#testView").removeClass("layui-hide");
+        var url = $("#CdConfig").val();
+        if ($.trim(url) == '') {
+            layer.alert('验证失败，摄像机IP空');
+        } else if($.trim(url).indexOf("rtsp:") == "-1") {
+            layer.alert('验证流格式必须为rtsp流');
+        } else {
+            layer.open({
+                type: 1,
+                title: "",
+                area: ['485px', '273px'],
+                content: $("#testView"),
+                cancel: function (index, layero) {
+                    layer.close(index);
+                    $("#testView").addClass("layui-hide");
+                    ocxPlayVideoStop("OcxViewer2");
+                },
+                success: function (index, layero) {
+                    setTimeout(function () {
+                        ocxPlayVideo("OcxViewer2",url);
+                    },1000);
+                }
+            });
+        }
+    }
+
+
+</script>
+
+</body>
+<div style="padding-top: 15px; box-shadow:rgb(0,59,91) 0px 0px 20px inset;" class="layui-hide" id="view" >
+    <div class="borderdiv layui-row" style="padding: 20px 0px 0px 0px;">
+        <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+            <div style="border-image: url(/static/images/img_titile_bg.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                <div class="h-table" style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                    <div class="h-cell">
+                        摄像头
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+        <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+        <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+        <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+        <form class="layui-form" style="margin: 0 20px;" lay-filter="editcamera">
+            <input type="hidden" id="camera_id" name="camera_id">
+            <input type="hidden" id="host_id" name="host_id">
+            <input type="hidden" id="LocaTion" name="LocaTion">
+            <input type="hidden" id="place_id" name="place_id">
+            <input type="hidden" id="mcode"  name="mcode"><!--0注册1修改-->
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>摄像机名称</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <input name="TitleName" class="layui-input" type="text" placeholder="请输入摄像机名称" lay-verify="required"/>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>摄像机编号</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <input name="CameraNub" class="layui-input" type="text" placeholder="请输入摄像机编号" lay-verify="required"/>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>摄像机ip</span>
+                    </div>
+                    <div class="layui-col-md6 layui-col-lg6">
+                        <input id="CdConfig" name="CdConfig" class="layui-input" type="text" placeholder="请输入摄像机ip" lay-verify="required"/>
+                    </div>
+                    <div class="layui-col-md2 layui-col-lg2" style="line-height: 20px;">
+                        <button type="button" class="layui-btn layui-btn-sm" style="margin-left: 25px; float: right" onclick="yanzheng()">&nbsp;流验证&nbsp;</button>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>视频宽度/高度</span>
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg4">
+                        <input name="width" class="layui-input" type="number" placeholder="请输入视频宽度" lay-verify="required"/>
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg4">
+                        <input name="height" class="layui-input" type="number" placeholder="请输入视频高度" lay-verify="required"/>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>算法摄像机ip</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <input name="algorithm_url" class="layui-input" type="text" placeholder="请输入摄像机ip" lay-verify="required"/>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>算法视频宽度/高度</span>
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg4">
+                        <input name="algorithm_width" class="layui-input" type="number" placeholder="请输入视频宽度" lay-verify="required"/>
+                    </div>
+                    <div class="layui-col-md4 layui-col-lg4">
+                        <input name="algorithm_height" class="layui-input" type="number" placeholder="请输入视频高度" lay-verify="required"/>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>视频编码</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <select class="layui-select" id="videoCode" name="videoCode">
+                            <option value="0" selected>H.264</option>
+                            <option value="1">H.265</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>安装位置</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <select class="layui-select" id="custom_id" name="place" lay-filter="place">
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                <div class="layui-row">
+                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                        <span>隶属功能</span>
+                    </div>
+                    <div class="layui-col-md8 layui-col-lg8">
+                        <select class="layui-select" name="function_type">
+                            <option value="cloths">着装监控</option>
+                            <option value="smoke">烟雾监测</option>
+                            <option value="fire">火焰检测</option>
+                            <option value="boundary">区域入侵</option>
+                            <option value="queue_count">离岗监测</option>
+                            <option value="sleep_count">睡岗监测</option>
+{{/*                            <option value="leakage">泄漏监测</option>*/}}
+                        </select>
+                    </div>
+                </div>
+            </div>
+{{/*            <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">*/}}
+{{/*                <div class="layui-row">*/}}
+{{/*                    <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">*/}}
+{{/*                        <span>默认投屏</span>*/}}
+{{/*                    </div>*/}}
+{{/*                    <div class="layui-col-md8 layui-col-lg8">*/}}
+{{/*                        <input type="checkbox" name="screen" lay-skin="switch" value="1" >*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+{{/*            </div>*/}}
+            <div style="text-align: center;margin:20px;">
+                <button type="button" class="layui-btn" lay-submit lay-filter="formDemo">保存</button>
+                <button type="button" class="layui-btn" onclick="cancel()">取消</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+
+</html>

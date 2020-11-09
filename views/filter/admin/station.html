@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css" />
+    <script src="/static/layui/layui.js"></script>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+</head>
+<style>
+    html,body{
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!-- 顶部 -->
+    {{template "filter/admin/commons/header.html" .}}
+    <!-- 菜单 -->
+    {{template "filter/admin/commons/menu.html" .}}
+    <div class="layui-body">
+        <div style="padding: 5px;">
+            <blockquote class="layui-elem-quote font-weight">系统设置</blockquote>
+        </div>
+        <div style="position: absolute;top: 62px;bottom: 0px;margin: 0 5px;width: 100%;">
+            <form class="layui-form" lay-filter="filterform">
+                <input id="filterstatus" name="filterstatus" class="layui-hide" value="0">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">过滤开关</label>
+                    <div class="layui-form-inline">
+                        <input type="checkbox" name="switch" lay-skin="switch" lay-filter="switch">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label"></label>
+                    <div class="layui-form-inline">
+                        <button class="layui-btn" lay-submit lay-filter="submit">更新</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['form'],function () {
+       var form = layui.form;
+
+       var status=0;
+       if({{.sysfilter}}=="true"||{{.sysfilter}}==true){
+            status=1;
+       }
+
+
+       form.val('filterform',{
+           'switch': status,
+           'filterstatus':status
+       });
+
+       form.on('switch(switch)',function (data) {
+          if(data.elem.checked == true){
+              $("#filterstatus").val(1);
+          }else{
+              $("#filterstatus").val(0);
+          }
+       });
+
+       form.on('submit(submit)',function (data) {
+           $.ajax({
+               url: '/filter/setStatus',
+               method: 'post',
+               data: data.field,
+               dataType: 'JSON',
+               success: function (res) {
+                   layer.alert(res.msg);
+               },
+               error: function (e) {
+                   layer.alert("服务器连接错误");
+               }
+           });
+
+           return false;
+       })
+    });
+</script>
+</body>
+</html>

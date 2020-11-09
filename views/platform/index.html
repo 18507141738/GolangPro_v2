@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" media="screen" href="/static/css/platform.css">
+    <link rel="stylesheet" href="/static/layui/css/layui.css"/>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/layui/layui.js"></script>
+    <script src="/static/js/echarts.min.js"></script>
+</head>
+<style>
+    .borderdiv{
+        border: 1px solid #4574d6;
+        border-radius:5px;
+        box-shadow:rgb(0,59,91) 0px 0px 20px inset;
+        height: 100%;
+        background: rgba(255,255,255,0.05);
+        position:relative;
+    }
+
+</style>
+<body style="width: 100%;height: 100%;background: url(/static/images/platform/index_bg.jpg) no-repeat;background-size: 100% 100%;">
+<div >
+    <!-- 顶部 -->
+    {{template "platform/commons/header.html" .}}
+
+    <div id="topView" style="position: relative;margin: 0 20px;">
+        <div class="borderdiv" style="min-height: 180px;width: 100%;position: relative">
+            <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+                <div style="border-image: url(/static/images/platform/insex_img03.png) 20 fill / 14px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                    <div class="h-table" style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.4rem;">
+                        <div class="h-cell">
+                            场景分析
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+            <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+            <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+            <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+
+            <div id="funcVice" class="layui-row" style="width: 100%;position: relative;padding: 20px 0">
+                <div id="zhdiv" class="layui-hide layui-col-sm2 layui-col-md2 layui-col-lg2" style="height: 140px;">
+                    <div style="width: 100%;height: 80%;position: absolute;top: 80px;transform: translateY(-50%);">
+                        <div style="width: 90%;height: 100%;margin: 0 auto;background-color: rgba(0,104,189, 0.3);border-radius: 6px;" onclick="push(0)">
+                            <div style="width: 40%;float: left;height: 100%;position: relative;">
+                                <img src="/static/images/platform/home/icon-shanggang.png" height="50%" style="position: absolute;top: 50%;transform: translateY(-50%);right: 5%;" />
+                            </div>
+                            <div style="margin-left: 40%;height: 100%; padding-left: 20px;">
+                                <div style="width: 100%;height: 55%;font-size: 3rem;color: #08d1ea;display: table;">
+                                    <div style="display: table-cell;vertical-align: bottom;width: 100%;height: 100%;">
+                                        <span id="zh-txt">--</span>
+                                    </div>
+                                </div>
+                                <div style="width: 100%;height: 45%;font-size: 1.5rem;color: #ffffff;padding-top: 5px;">
+                                    闸门人脸识别
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ywdiv" class="layui-hide layui-col-sm2 layui-col-md2 layui-col-lg2" style="height: 140px;">
+                    <div style="width: 100%;height: 80%;position: absolute;top: 80px;transform: translateY(-50%);">
+                        <div style="width: 90%;height: 100%;margin: 0 auto;background-color: rgba(0,104,189, 0.3);border-radius: 6px;" onclick="push(1)">
+                            <div style="width: 40%;float: left;height: 100%;position: relative;">
+                                <img src="/static/images/platform/home/icon-yanwu.png" height="50%" style="position: absolute;top: 50%;transform: translateY(-50%);right: 5%;" />
+                            </div>
+                            <div style="margin-left: 40%;height: 100%; padding-left: 20px;">
+                                <div style="width: 100%;height: 55%;font-size: 3rem;color: #08d1ea;display: table;">
+                                    <div style="display: table-cell;vertical-align: bottom;width: 100%;height: 100%;">
+                                        <span id="yw-txt">--</span>
+                                    </div>
+                                </div>
+                                <div style="width: 100%;height: 45%;font-size: 1.5rem;color: #ffffff;padding-top: 5px;">
+                                    厂区烟雾监测
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="hmdiv" class="layui-hide layui-col-sm2 layui-col-md2 layui-col-lg2" style="height: 140px;">
+                    <div style="width: 100%;height: 80%;position: absolute;top: 80px;transform: translateY(-50%);">
+                        <div style="width: 90%;height: 100%;margin: 0 auto;background-color: rgba(0,104,189, 0.3);border-radius: 6px;" onclick="push(2)">
+                            <div style="width: 40%;float: left;height: 100%;position: relative;">
+                                <img src="/static/images/platform/home/icon-huoyan.png" height="50%" style="position: absolute;top: 50%;transform: translateY(-50%);right: 5%;" />
+                            </div>
+                            <div style="margin-left: 40%;height: 100%; padding-left: 20px;">
+                                <div style="width: 100%;height: 55%;font-size: 3rem;color: #08d1ea;display: table;">
+                                    <div style="display: table-cell;vertical-align: bottom;width: 100%;height: 100%;">
+                                        <span id="hm-txt">--</span>
+                                    </div>
+                                </div>
+                                <div style="width: 100%;height: 45%;font-size: 1.5rem;color: #ffffff;padding-top: 5px;">
+                                    漏水漏泥监测
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+{{/*                <div id="qydiv" class="layui-hide layui-col-sm2 layui-col-md2 layui-col-lg2" style="height: 140px;">*/}}
+{{/*                    <div style="width: 100%;height: 80%;position: absolute;top: 80px;transform: translateY(-50%);">*/}}
+{{/*                        <div style="width: 90%;height: 100%;margin: 0 auto;background-color: rgba(0,104,189, 0.3);border-radius: 6px;" onclick="push(3)">*/}}
+{{/*                            <div style="width: 40%;float: left;height: 100%;position: relative;">*/}}
+{{/*                                <img src="/static/images/platform/home/icon-zhoujie.png" height="50%" style="position: absolute;top: 50%;transform: translateY(-50%);right: 5%;" />*/}}
+{{/*                            </div>*/}}
+{{/*                            <div style="margin-left: 40%;height: 100%; padding-left: 20px;">*/}}
+{{/*                                <div style="width: 100%;height: 55%;font-size: 3rem;color: #08d1ea;display: table;">*/}}
+{{/*                                    <div style="display: table-cell;vertical-align: bottom;width: 100%;height: 100%;">*/}}
+{{/*                                        <span id="qy-txt">--</span>*/}}
+{{/*                                    </div>*/}}
+{{/*                                </div>*/}}
+{{/*                                <div style="width: 100%;height: 45%;font-size: 1.5rem;color: #ffffff;padding-top: 5px;">*/}}
+{{/*                                    高危区域监测*/}}
+{{/*                                </div>*/}}
+{{/*                            </div>*/}}
+{{/*                        </div>*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+
+                <div id="lgdiv" class="layui-hide layui-col-sm2 layui-col-md2 layui-col-lg2" style="height: 140px;">
+                    <div style="width: 100%;height: 80%;position: absolute;top: 80px;transform: translateY(-50%);">
+                        <div style="width: 90%;height: 100%;margin: 0 auto;background-color: rgba(0,104,189, 0.3);border-radius: 6px;" onclick="push(4)">
+                            <div style="width: 40%;float: left;height: 100%;position: relative;">
+                                <img src="/static/images/platform/home/icon-ligang.png" height="50%" style="position: absolute;top: 50%;transform: translateY(-50%);right: 5%;" />
+                            </div>
+                            <div style="margin-left: 40%;height: 100%; padding-left: 20px;">
+                                <div style="width: 100%;height: 55%;font-size: 3rem;color: #08d1ea;display: table;">
+                                    <div style="display: table-cell;vertical-align: bottom;width: 100%;height: 100%;">
+                                        <span id="lg-txt">--</span>
+                                    </div>
+                                </div>
+                                <div style="width: 100%;height: 45%;font-size: 1.5rem;color: #ffffff;padding-top: 5px;">
+                                    人数超限监测
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+{{/*                <div id="sgdiv" class="layui-hide layui-col-sm2 layui-col-md2 layui-col-lg2" style="height: 140px;">*/}}
+{{/*                    <div style="width: 100%;height: 80%;position: absolute;top: 80px;transform: translateY(-50%);">*/}}
+{{/*                        <div style="width: 90%;height: 100%;margin: 0 auto;background-color: rgba(0,104,189, 0.3);border-radius: 6px;" onclick="push(5)">*/}}
+{{/*                            <div style="width: 40%;float: left;height: 100%;position: relative;">*/}}
+{{/*                                <img src="/static/images/platform/home/icon-shuigang.png" height="50%" style="position: absolute;top: 50%;transform: translateY(-50%);right: 5%;" />*/}}
+{{/*                            </div>*/}}
+{{/*                            <div style="margin-left: 40%;height: 100%; padding-left: 20px;">*/}}
+{{/*                                <div style="width: 100%;height: 55%;font-size: 3rem;color: #08d1ea;display: table;">*/}}
+{{/*                                    <div style="display: table-cell;vertical-align: bottom;width: 100%;height: 100%;">*/}}
+{{/*                                        <span id="sg-txt">--</span>*/}}
+{{/*                                    </div>*/}}
+{{/*                                </div>*/}}
+{{/*                                <div style="width: 100%;height: 45%;font-size: 1.5rem;color: #ffffff;padding-top: 5px;">*/}}
+{{/*                                    员工睡岗监测*/}}
+{{/*                                </div>*/}}
+{{/*                            </div>*/}}
+{{/*                        </div>*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+
+{{/*                <div id="xldiv" class="layui-hide layui-col-sm2 layui-col-md2 layui-col-lg2" style="height: 140px;">*/}}
+{{/*                    <div style="width: 100%;height: 80%;position: absolute;top: 80px;transform: translateY(-50%);">*/}}
+{{/*                        <div style="width: 90%;height: 100%;margin: 0 auto;background-color: rgba(0,104,189, 0.3);border-radius: 6px;" onclick="push(6)">*/}}
+{{/*                            <div style="width: 40%;float: left;height: 100%;position: relative;">*/}}
+{{/*                                <img src="/static/images/platform/home/icon-xielou.png" height="50%" style="position: absolute;top: 50%;transform: translateY(-50%);right: 5%;" />*/}}
+{{/*                            </div>*/}}
+{{/*                            <div style="margin-left: 40%;height: 100%; padding-left: 20px;">*/}}
+{{/*                                <div style="width: 100%;height: 55%;font-size: 3rem;color: #08d1ea;display: table;">*/}}
+{{/*                                    <div style="display: table-cell;vertical-align: bottom;width: 100%;height: 100%;">*/}}
+{{/*                                        <span id="xl-txt">--</span>*/}}
+{{/*                                    </div>*/}}
+{{/*                                </div>*/}}
+{{/*                                <div style="width: 100%;height: 45%;font-size: 1.5rem;color: #ffffff;padding-top: 5px;">*/}}
+{{/*                                    泄露监测*/}}
+{{/*                                </div>*/}}
+{{/*                            </div>*/}}
+{{/*                        </div>*/}}
+{{/*                    </div>*/}}
+{{/*                </div>*/}}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 图表 -->
+    <div id="content" style="width: 100%;position: relative;height: 400px">
+        <div id="top" style="position: absolute;left: 20px;right: 20px;top: 50px;bottom: 20px;">
+            <div class="borderdiv" style="position: relative;height: 100%;width: 100%;">
+                <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+                    <div style="border-image: url(/static/images/platform/insex_img03.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                        <div class="h-table" style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.4rem;">
+                            <div class="h-cell">
+                                事件图表
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+                <div id="char4" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<input type="hidden" id="jurisdiction" value="{{.jurisdiction}}"/>
+
+</body>
+
+<script>
+
+    function push(obj){
+        var jurs = {{.jurisdiction}};
+        if(browser.versions.trident){
+            var urls = ["/platform/funcpageie?type=cloths","/platform/funcpageie?type=smoke","/platform/funcpageie?type=fire","/platform/funcpageie?type=boundary","/platform/funcpageie?type=queue_count","/platform/funcpageie?type=sleep_count","/platform/funcpageie?type=leakage"];
+        }else{
+            var urls = ["/platform/funcpage?type=cloths","/platform/funcpage?type=smoke","/platform/funcpage?type=fire","/platform/funcpage?type=boundary","/platform/funcpage?type=queue_count","/platform/funcpage?type=sleep_count","/platform/funcpage?type=leakage"];
+        }
+        if (jurs.indexOf(obj) != -1){
+            window.location.href = urls[obj];
+        }
+    }
+
+    /*重定义图表容器高度*/
+    window.onload = function () {
+        reload();
+    }
+
+    function reload(){
+        var top = document.getElementById("topView");
+        var cnt = document.getElementById("content");
+        var jurs = $("#jurisdiction").val();
+        var arr = jurs.split(",");
+        var topH = 140+60;
+        // if (arr.length > 6){
+        //     topH = 140*2 + 60;
+        // }
+
+        var h = document.body.scrollHeight - (topH + top.offsetTop);
+        if(h>400){
+            cnt.style.height = h+"px";
+        }else{
+            cnt.style.height = "400px";
+        }
+        echarts.init(document.getElementById("char4")).resize();
+    }
+
+    layui.use(['element','layer'],function () {
+        var layer = layui.layer;
+        
+    });
+    
+    function getHomeData() {
+        $.ajax({
+            url : "/platform/homedata",
+            method: 'post',
+            dataType: 'JSON',
+            success: function (res) {
+                if (res.Code == "1") {
+                    var ac = res.AC;
+                    var charts = res.Chart;
+                    var jurs = res.Jur;
+                    // console.log(jurs);
+                    //
+
+                    if (jurs.indexOf("0")>-1){
+                        $("#zhdiv").removeClass("layui-hide");
+                    }else{
+                        $("#rlsbdiv").addClass("layui-hide");
+                    }
+                    if (jurs.indexOf("1")>-1){
+                        $("#ywdiv").removeClass("layui-hide");
+                    }else{
+                        $("#ywdiv").addClass("layui-hide");
+                    }
+
+                    if (jurs.indexOf("2")>-1){
+                        $("#hmdiv").removeClass("layui-hide");
+                    }else{
+                        $("#hmdiv").addClass("layui-hide");
+                    }
+                    if (jurs.indexOf("3")>-1){
+                        $("#qydiv").removeClass("layui-hide");
+                    }else {
+                        $("#qydiv").addClass("layui-hide");
+                    }
+                    if (jurs.indexOf("4")>-1){
+                        $("#lgdiv").removeClass("layui-hide");
+                    }else {
+                        $("#lgdiv").addClass("layui-hide");
+                    }
+                    if (jurs.indexOf("5")>-1){
+                        $("#sgdiv").removeClass("layui-hide");
+                    }else{
+                        $("#sgdiv").addClass("layui-hide");
+                    }
+                    // if (jurs.indexOf("6")>-1){
+                    //     $("#xldiv").removeClass("layui-hide");
+                    // }else{
+                    //     $("#xldiv").addClass("layui-hide");
+                    // }
+
+                    $("#zh-txt").html("--");
+                    $("#yw-txt").html("--");
+                    $("#hm-txt").html("--");
+                    $("#qu-txt").html("--");
+                    $("#lg-txt").html("--");
+                    $("#sg-txt").html("--");
+                    // $("#xl-txt").html("--");
+                    var ac_key = new Array();
+                    for (var key in ac){
+                        // console.log(key);
+                        ac_key.push(key);
+                        if (key == "zh"){
+                            $("#zh-txt").html(ac["zh"]);
+                        }
+                        if (key == "yw"){
+                            $("#yw-txt").html(ac["yw"]);
+                        }
+                        if (key == "hm"){
+                            $("#hm-txt").html(ac["hm"]);
+                        }
+                        if (key == "qy"){
+                            $("#qy-txt").html(ac["qy"]);
+                        }
+                        if (key == "lg"){
+                            $("#lg-txt").html(ac["lg"]);
+                        }
+                        if (key == "sg"){
+                            $("#sg-txt").html(ac["sg"]);
+                        }
+                        // if (key == "xl"){
+                        //     $("#xl-txt").html(ac["xl"]);
+                        // }
+                    }
+
+                    setChart(charts,ac_key);
+                }else{
+                    layer.alert(res.Reason);
+                }
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+
+        });
+    }
+    getHomeData();
+</script>
+<script>
+    function setChart(data,key){
+
+        var triefs = new Array();
+        var nums = new Array();
+        var numc = new Array();
+        // for (let i in data){
+        for(var i=0;i<data.length;i++ ){
+            var brief_time = data[i].brief_time;
+            var num = data[i].num;
+            triefs.push(brief_time);
+            nums.push(num);
+            var numc2 = new Array();
+            // for (let v in data[i]){
+            for(var v=0;v<data[i].length;v++ ){
+                var d = data[i]
+                // console.log(JSON.stringify(d["num_jy"]));
+                if(v == "num_zh"){
+                    a = {"name":"闸门人脸识别","num":d["num_zh"],"icon":"/static/images/platform/icon-shanggang.png"};
+                    numc2.push(a);
+                }else if(v == "num_yw"){
+                    a = {"name":"厂区烟雾监测","num":d["num_yw"],"icon":"/static/images/platform/icon-yanwu.png"};
+                    numc2.push(a);
+                }else if(v == "num_hm"){
+                    a = {"name":"漏水漏泥监测","num":d["num_hm"],"icon":"/static/images/platform/icon-huoyan.png"};
+                    numc2.push(a);
+                }else if(v == "num_lg"){
+                    a = {"name":"人数超限监测","num":d["num_lg"],"icon":"/static/images/platform/icon-ligang.png"};
+                    numc2.push(a);
+                }
+                // else if(v == "num_qy"){
+                //     a = {"name":"高位区域监测","num":d["num_qy"],"icon":"/static/images/platform/icon-zhoujie.png"};
+                //     numc2.push(a);
+                // }else if(v == "num_sg"){
+                //     a = {"name":"员工睡岗监测","num":d["num_sg"],"icon":"/static/images/platform/icon-shuigang.png"};
+                //     numc2.push(a);
+                // }
+                // else if(v == "num_xl"){
+                //     a = {"name":"泄漏监测","num":d["num_xl"],"icon":"/static/images/platform/icon-xielou.png"};
+                //     numc2.push(a);
+                // }
+            }
+            numc.push(numc2)
+        }
+        // console.log(numc);
+        var tips = new Array();
+
+
+        var myChart = echarts.init(document.getElementById("char4"));
+        option = {
+            color: ['#00e4ff'],
+            grid: {
+                left: '2%',
+                right: '2%',
+                bottom: '1%',
+                containLabel: true
+            },
+            tooltip: {
+                trigger : 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                formatter: function (params) {
+                    // console.log(JSON.stringify(params));
+
+                    var child = numc[params[0].dataIndex];
+
+                    var htmlStr = "<div style='padding: 10px;'>";
+                    htmlStr += "<span>总量:"+params[0].data+"</span><br/>";
+                    var h = "";
+                    var c = ["FF5809","e47b08","0000C6","00DB00","BBFFFF"];
+                    // for (let i in child){
+                    for(var i=0;i<child.length;i++ ){
+                        // console.log(JSON.stringify(child[i]));
+                        // htmlStr += "<span style='margin-top: 5px;display:inline-block;margin-right:5px;border-radius:10px;width:10px;height:10px;background-color:#"+c[i]+";'></span>"+ child[i].name + ":" + child[i].num+"<br/>";
+
+                        htmlStr += "<div style='height: 20px;line-height: 20px;'>"
+                        htmlStr += "<i style='display: inline-block;margin-right: 5px;background: url(" +child[i].icon + ");background-size: 100%;width: 16px;height: 16px;margin-top: 2px;float: left;'></i>"+ child[i].name + ":" + child[i].num+"<br/>";
+                        htmlStr += "</div>"
+                    }
+
+
+                    return htmlStr;
+                }
+            },
+            xAxis: {
+                type: 'category',
+                data: triefs,
+                axisLabel: {
+                    color: '#00fcf9'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#4574d6'
+                    }
+                },
+                splitLine:{
+                    show: true,
+                    lineStyle: {
+                        color: '#4574d6'
+                    }
+                }
+
+            },
+            yAxis: {
+                type: 'value',
+                minInterval: 1,
+                axisLabel: {
+                    color: '#00fcf9'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#4574d6'
+                    }
+                },
+                splitLine:{
+                    lineStyle: {
+                        color: '#4574d6'
+                    }
+                }
+            },
+            series: [{
+                itemStyle: {
+                    normal: {
+                        //好，这里就是重头戏了，定义一个list，然后根据所以取得不同的值，这样就实现了，
+                        color: function(params) {
+                            // build a color map as your need.
+                            var colorList = [
+                                '#0794da','#0794da','#0794da','#0794da','#0794da',
+                                '#0794da','#0794da','#0794da','#0794da','#0794da',
+                                '#28bf68','#28bf68','#28bf68','#28bf68','#28bf68',
+                                '#28bf68','#28bf68','#28bf68','#28bf68','#28bf68',
+                                '#dac517','#dac517','#dac517','#dac517','#dac517',
+                                '#dac517','#dac517','#dac517','#dac517','#f27b08','#f27b08'
+                            ];
+                            // if (params.dataIndex<nums.length-2){
+                            //     return colorList[params.dataIndex];
+                            // }else{
+                            //     return colorList[nums.length-1];
+                            // }
+                            return colorList[params.dataIndex]
+                        },
+                        //以下为是否显示，显示位置和显示格式的设置了
+                        // label: {
+                        //     show: true,
+                        //     position: 'top',
+                        //     //                             formatter: '{c}'
+                        //     formatter: '{b}\n{c}'
+                        // }
+                    }
+                },
+                data: nums,
+                barWidth: '40%',
+                type: 'bar',
+
+
+            }]
+        };
+        myChart.setOption(option);
+    }
+
+    // JSON.stringify()
+    window.addEventListener("resize", function () {
+        reload();
+    });
+</script>
+
+</html>

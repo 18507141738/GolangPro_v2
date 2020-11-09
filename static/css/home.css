@@ -1,0 +1,15 @@
+html,body{
+    min-width: 1200px;
+}
+.layui-form-label{
+    width: auto;
+}
+.layui-form-item .layui-inline{
+    margin-top: 5px;
+}
+.layui-form-item {
+    margin-bottom: 0;
+}
+.layui-table, .layui-table-view {
+    margin: 0;
+}

@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" media="screen" href="/static/css/platform.css">
+    <link rel="stylesheet" href="/static/css/zTreeStyle/zTreeStyle.css"/>
+    <link rel="stylesheet" href="/static/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/static/css/border.css"/>
+    <link href="/static/css/video-js.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/formSelects-v4.css"/>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/ocxVideo.js"></script>
+
+    <style>
+        .borderdiv{
+            border: 1px solid #00ccff;
+            border-radius:5px;
+            box-shadow:rgb(0,59,91) 0px 0px 20px inset;
+            height: 60%;
+            background: rgba(255,255,255,0.05);
+            position:relative;
+            margin: 20px;
+        }
+        .ztree li a {
+            color: #65e0e3;
+        }
+        .layui-table-tool {
+            background: transparent;
+            border: 0px;
+        }
+        /*下拉框样式*/
+        .commontext {
+            color: #65e0e3;
+            font-size: 12px;
+            height: 30px;
+        }
+
+        .layui-form-label {
+            float: left;
+            display: block;
+            padding: 5px 15px;
+            width: 80px;
+            font-weight: 400;
+            line-height: 20px;
+            text-align: right;
+        }
+
+        .layui-form input {
+            background-color: transparent;
+            border-radius: 5px;
+            color: white;
+            height: 30px;
+            border: 1px solid #00fcf9;
+            background: transparent;
+        }
+
+        .layui-form-select dl {
+            background-color: #2F4056;
+        }
+
+        .layui-form-select dl dd {
+            color: white;
+            background: #2F4056;
+        }
+
+        .layui-form-select dl dd:hover {
+            background: #00ccff;
+        }
+
+        /*修改提示文字颜色 */
+        input::-webkit-input-placeholder {
+            color: white;
+            font-size: 12px;
+        }
+        .layui-layer-page .layui-layer-content {
+            background: #152f5b;
+            color: #ffffff;
+            border-top: 1px solid #6076ad;
+            border-bottom: 1px solid #6076ad;
+            border-left: 1px solid #6076ad;
+            border-right: 1px solid #6076ad;
+            border-radius: 5px;
+        }
+        .layui-input {
+            background-color: transparent;
+            color: #FFF;
+            border: 1px solid #00fcf9;
+            border-radius: 5px;
+            height: 35px;
+        }
+        .btn-submit {
+            border: 1px solid #00fcf9;
+            width: 100%;
+            height: 30px;
+            line-height: 30px;
+            background: #FFB800;
+        }
+        .layui-form-label {
+            color: #65e0e3;
+        }
+    </style>
+    <script>
+        function region() {
+            var id = UrlParam.paramValues("id");
+            var function_type = UrlParam.paramValues("function_type");
+            $.ajax({
+                // async : false,
+                cache:false,
+                type: 'POST',
+                dataType : "json",
+                data:{"camara_id":id.toString(),"function_type":function_type.toString()},
+                url: "/getAlgorithmList/",//请求的action路径
+                error: function () {//请求失败处理函数
+                    alert('请求失败');
+                },
+                success:function(data){ //请求成功后处理函数。
+                    var region =data.Reason[0].location;
+                    var playurl = data.Reason[0].cdconfig;
+                    var id = data.Reason[0].id;
+                    var boundary = data.Reason[0].boundary;
+                    var boundary2 = data.Reason[0].boundary2;
+                    var frequency = data.Reason[0].frequency;
+                    var threshold = data.Reason[0].threshold;
+                    var bg_threshold = data.Reason[0].bg_threshold;
+                    var perimeterThreshold = data.Reason[0].perimeterThreshold;
+                    var distance = data.Reason[0].distance;
+                    var wRate =data.Reason[0].wRate;
+                    var hRate = data.Reason[0].hRate;
+                    var DistanceMode = data.Reason[0].DistanceMode;
+                    var area_shape = data.Reason[0].area_shape;
+                    var alarm_mode=data.Reason[0].alarm_mode;
+                    var modes = eval("([" + DistanceMode + "])");
+
+                    var alarm_time_second = data.Reason[0].alarm_time_second;
+                    $("#alarm_time_second").val(alarm_time_second);
+
+                    formSelects.value('DistanceMode', modes.map(String));
+                    if(alarm_mode=="1"){
+                        $("#divfrequency").css('display', 'block');
+                    }
+
+                    var timepoint = data.Reason[0].timepoint;
+                    if(timepoint!=""&&timepoint!=null){
+                        var times = timepoint.toString().split("],[");
+                        $("#warningTime1").val(times[0].toString().replace("[[","").replace("]]","").replace(","," - "));
+                        $("#warningTime2").val(times[1].toString().replace("[[","").replace("]]","").replace(","," - "));
+                        $("#warningTime3").val(times[2].toString().replace("[[","").replace("]]","").replace(","," - "));
+                        $("#warningTime4").val(times[3].toString().replace("[[","").replace("]]","").replace(","," - "));
+                    }
+
+                    layui.use('form', function() {
+                        var form = layui.form;
+                        //表单初始赋值
+                        form.val('testform', {
+                            "alarm_mode": alarm_mode,
+                            "area_shape": area_shape,
+                            "frequency": frequency,
+                            "distance":distance
+                        })
+                        var video_switch =  data.Reason[0].video_switch;
+                        $("input[name=video_switch][value='1']").attr("checked", video_switch == 1 ? true : false);
+                        $("input[name=video_switch][value='0']").attr("checked", video_switch == 0 ? true : false);
+                        form.render();
+                    });
+                    $("#region").val(region);
+                    $("#boundary").val(boundary);
+                    $("#boundary2").val(boundary2);
+                    $("#threshold").val(threshold);
+                    $("#bg_threshold").val(bg_threshold);
+                    $("#perimeterThreshold").val(perimeterThreshold);
+
+                    $("#caremaId").val(id);
+                    $("#GetVideoStream").val(data.Reason[0].algorithm_url);
+
+                    ocxPlayVideo("OcxViewer1",data.Reason[0].algorithm_url);
+                }
+            });
+
+        }
+
+
+    </script>
+</head>
+<body>
+<div style="width: 100%;background: url(/static/images/platform/index_bg.jpg) no-repeat; min-height: 100%;">
+    <!-- 顶部 -->
+    {{template "platform/commons/header.html" .}}
+    <div class="layui-row">
+        <div class="layui-rol-md12" style="margin-bottom: 20px">
+            <span style="color: #65e0e3; margin-left: 20px; font-size: 12px; ;">
+                <a href="/platform/centerpage" style="color: #65e0e3;">个人中心</a>&nbsp;>&nbsp;
+                <a href="/platform/centerhostmanagerpage" style="color: #65e0e3;">主机列表</a> &nbsp;>&nbsp;
+                <a href="javascript:window.history.back();" style="color:#65e0e3;">摄像头列表</a> &nbsp;>&nbsp;
+                火焰监控配置
+            </span>
+        </div>
+
+        <div class="layui-col-md12">
+            <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+                    <div style="border-image: url(/static/images/img_titile_bg.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                        <div class="h-table" style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                            <div class="h-cell">
+                                火焰监控配置
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+                <input type="hidden" id="moshi">
+                <input type="hidden" id="zuobiao">
+                <div style="top: 62px;bottom: 0px;left: 5px;right: 5px;">
+                    <div class="layui-row" style="height: 100%">
+                        <div class="layui-col-md6">
+                            <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+
+                                <div style="height: 132px;width: 100%;background: transparent; color: #F5F5F5">
+                                    <div id="duobian">
+                                        <form class="layui-form" action="" >
+                                            <div class="layui-form-item" style="margin-bottom: 5px">
+                                                <label class="layui-form-label"
+                                                       style="padding-left: 0px;padding-right: 0px; margin-top: 5px;">区域形状:</label>
+                                                <div class="layui-input-block">
+                                                    <input type="radio" name="areashape" value="2" title="四边形" checked
+                                                           lay-filter="areashape">
+                                                    <input type="radio" name="areashape" value="3" title="多边形"
+                                                           lay-filter="areashape">
+                                                </div>
+                                            </div>
+                                            <div class="layui-form-item" >
+                                                <label class="layui-form-label"
+                                                       style="padding-left: 0px;padding-right: 0px; margin-top: 5px;">视图类型:</label>
+                                                <div class="layui-input-block">
+                                                    <input type="radio" name="sample" value="1" title="正样本" checked
+                                                           lay-filter="sample">
+                                                    <input type="radio" name="sample" value="2" title="负样本"
+                                                           lay-filter="sample">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div style="width:100%;position: relative; left: 20px; top: 10px;" >
+                                    <div id="ocxvideoview">
+                                        <object id="OcxViewer1" classid="CLSID:B16A9F87-73B2-47F1-86F0-88162BBE856A" width="480" height="270"></object>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-col-md6">
+                            <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+
+                                <form class="layui-form" id="securityform" style="padding-right: 20px;" id="formC" lay-filter="testform">
+                                    <input type="hidden" name="function_type" value="fire">
+                                    <input type="hidden" id="caremaId" name="id">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">监控区域:</label>
+                                        <div class="layui-input-block">
+                                            <input id="region" name="location" type="text" class="layui-input"
+                                                   placeholder="请输入防盗区域" lay-verify="required"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">坐标:</label>
+                                        <div class="layui-input-block">
+                                            <input name="boundary" id="boundary" type="text" class="layui-input" placeholder=""
+                                                   lay-verify="required"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">负样本坐标:</label>
+                                        <div class="layui-input-block">
+                                            <input name="boundary2" id="boundary2" type="text" class="layui-input" placeholder="" lay-verify="required"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">火的相似度:</label>
+                                        <div class="layui-input-block">
+                                            <input name="threshold" id="threshold" type="text" class="layui-input" placeholder="范围0.1~0.4"
+                                            />
+                                        </div>
+                                    </div>
+{{/*                                    <div class="layui-form-item" style="display: none">*/}}
+{{/*                                        <label class="layui-form-label">BG阈值:</label>*/}}
+{{/*                                        <div class="layui-input-block">*/}}
+{{/*                                            <input id="bg_threshold" name="bg_threshold" type="text" class="layui-input"*/}}
+{{/*                                                   placeholder="" />*/}}
+{{/*                                        </div>*/}}
+{{/*                                    </div>*/}}
+
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">轮廓周长:</label>
+                                        <div class="layui-input-block">
+                                            <input id="perimeterThreshold" name="perimeterThreshold" type="text"
+                                                   class="layui-input" placeholder="" lay-verify="required"/>
+                                        </div>
+                                    </div>
+{{/*                                    <div class="layui-form-item" style="display: none">*/}}
+{{/*                                        <label class="layui-form-label">检测目标距离:</label>*/}}
+{{/*                                        <div class="layui-input-block">*/}}
+{{/*                                            <select id="DistanceMode" name="DistanceMode" xm-select="DistanceMode"*/}}
+{{/*                                                    lay-verify="required" >*/}}
+{{/*                                                <option value="0">远(8-25米)</option>*/}}
+{{/*                                                <option value="1">中(4-16米)</option>*/}}
+{{/*                                                <option value="2">近(2-10米)</option>*/}}
+{{/*                                            </select>*/}}
+{{/*                                        </div>*/}}
+{{/*                                    </div>*/}}
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">监测目标距离:</label>
+                                        <div class="layui-input-block">
+                                            <input id="distance" name="distance" type="text" value="1.0" class="layui-input" placeholder="" lay-verify="required"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警模式:</label>
+                                        <div class="layui-input-block">
+                                            <select id="alarm_mode" name="alarm_mode" class="layui-select"
+                                                    lay-filter="alarm_mode">
+                                                <option value="">请选择报警模式</option>
+                                                <option value="0">持续报警（默认为15秒/次）</option>
+                                                <option value="1">频率报警</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="divfrequency" style="display: none">
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label">报警频率(分):</label>
+                                            <div class="layui-input-block">
+{{/*                                                <select id="frequency" name="frequency" class="layui-select"*/}}
+{{/*                                                        lay-filter="alarmFrequency" >*/}}
+{{/*                                                    <option value="">请选择报警频率</option>*/}}
+{{/*                                                    <option value="30">30秒1次</option>*/}}
+{{/*                                                    <option value="60">1分钟1次</option>*/}}
+{{/*                                                    <option value="120">2分钟1次</option>*/}}
+{{/*                                                    <option value="1800">30分钟1次</option>*/}}
+{{/*                                                    <option value="3600">60分钟1次</option>*/}}
+{{/*                                                    <option value="7200">120分钟1次</option>*/}}
+{{/*                                                </select>*/}}
+                                                <input id="frequency" name="frequency" idlay-filter="alarmFrequency" type="text" class="layui-input" value="15"></input>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警时间:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" placeholder="请选择报警时间" class="layui-input test-item" id="warningTime1" lay-key="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警时间:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" placeholder="请选择报警时间" class="layui-input test-item" id="warningTime2" lay-key="2"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警时间:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" placeholder="请选择报警时间" class="layui-input test-item" id="warningTime3" lay-key="3"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警时间:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" placeholder="请选择报警时间" class="layui-input test-item" id="warningTime4" lay-key="4"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">是否存储短视频:</label>
+                                        <div class="layui-input-block" id="whole" style="color: #F5F5F5">
+                                            <input type="radio" name="video_switch" value="1" title="是" checked>
+                                            <input type="radio" name="video_switch" value="0" title="否" >
+                                        </div>
+                                    </div>
+{{/*                                    <div class="layui-form-item">*/}}
+{{/*                                        <label class="layui-form-label">报警时长(秒):</label>*/}}
+{{/*                                        <div class="layui-input-block">*/}}
+{{/*                                            <input name="alarm_time_second" id="alarm_time_second" type="number" class="layui-input" placeholder="" />*/}}
+{{/*                                        </div>*/}}
+{{/*                                    </div>*/}}
+
+                                    <div class="layui-form-item">
+                                        <div class="layui-input-block">
+                                            <button class="layui-btn" type="button" lay-submit lay-filter="formDemo">确定</button>
+                                            <button type="button" class="layui-btn  layui-btn-danger "
+                                                    onclick="clear_boundary()">清空区域
+                                            </button>
+                                            <button type="button" class="layui-btn  layui-btn-danger "
+                                                    onclick="clear_sys_boundary()">清空算法负样本
+                                            </button>
+                                            <!-- <button class="layui-btn" type="button" onclick="addTimes()">添加时间段</button> -->
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/layui/layui.js"></script>
+<script src="/static/js/formSelects-v4.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    var formSelects = layui.formSelects;
+
+    var ocxWidth = 1, ocxHeight = 1;
+
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        //同时绑定多个
+        lay('.test-item').each(function(){
+            laydate.render({
+                elem: this
+                ,type: 'time'
+                ,range: true,
+                format: 'HH:mm'
+                ,trigger: 'click'
+            });
+        });
+    });
+</script>
+
+<script type="text/javascript" event="EventAction(eventType, eventValue, eventDesc)" for="OcxViewer1">
+    // 1 初始化成功 10 画框返回值返回当前画的
+    if(eventType=="10"){
+
+        if(isSampleZ){
+            var boundary = ""
+            if ($('#boundary').val() == "[]") {
+                var boundary = ocx2HtmlSize(eventDesc);
+            } else {
+                var boundary = $('#boundary').val() + ocx2HtmlSize(eventDesc);
+            }
+            $("#boundary").val(boundary);
+        }else{
+            var boundary = ""
+            if ($('#boundary2').val() == "[]") {
+                var boundary = ocx2HtmlSize(eventDesc);
+            } else {
+                var boundary = $('#boundary2').val() + ocx2HtmlSize(eventDesc);
+            }
+            $("#boundary2").val(boundary);
+        }
+
+    }else if(eventType=="1"){
+        var size = ocxVideoSize("OcxViewer1");
+        ocxWidth = Number(size[0]);
+        ocxHeight = Number(size[1]);
+        ocxPushMultiShape("OcxViewer1", html2OcxSize($('#boundary').val()));
+        ocxDrawRect("OcxViewer1");
+    }
+</script>
+
+<script>
+    var isSampleZ = true;
+
+    function ocx2HtmlSize(boundary) {
+        if (boundary == "" || ocxWidth == 1 || ocxHeight == 1) {
+            return "";
+        }
+
+        var str = "";
+        if (boundary != "") {
+            var array = eval("(" + boundary + ")");// 坐标框转换数组
+
+            if (array.length > 0) {
+                for (var index_a = 0; index_a < array.length; index_a++) {
+                    if (index_a == 0) {
+                        str += "[";
+                    }
+                    var point = array[index_a];
+                    str += "[" + parseInt(Number(point[0])*480/ocxWidth) + "," + parseInt(Number(point[1])*270/ocxHeight) + "]"
+                    if (index_a < array.length - 1) {
+                        str += ","
+                    } else if (index_a == array.length - 1) {
+                        str += "];";
+                    }
+                }
+            }
+        }
+        return str;
+    }
+
+    function html2OcxSize(boundary) {
+        if(boundary==""||ocxWidth==1||ocxHeight==1){
+            return "";
+        }
+        var arr = boundary.toString().split(";");
+
+        var str = "";
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i].toString() != "") {
+                var array = eval("(" + arr[i].toString() + ")");// 坐标框转换数组
+
+                if (array.length > 0) {
+                    for (var index_a = 0; index_a < array.length; index_a++) {
+                        if(index_a==0){
+                            str += "[";
+                        }
+                        var point = array[index_a];
+                        str += "["+parseInt(Number(point[0])*ocxWidth/480)+","+parseInt(Number(point[1])*ocxHeight/270)+"]"
+                        if (index_a < array.length-1) {
+                            str += ","
+                        }else if(index_a == array.length-1){
+                            str += "];";
+                        }
+                        // console.log('原始:' + point[0] + ' ' + point[1]);
+                        // console.log('转换后:' + parseInt(Number(point[0])*480/ocxWidth) + ' ' + parseInt(Number(point[1])*270/ocxHeight));
+                    }
+                }
+            }
+        }
+        return str;
+    }
+
+    layui.use('form', function () {
+        var form = layui.form;
+        //监听提交
+        form.on('submit(formDemo)', function (data) {
+            // parent.layer.alert(JSON.stringify(data.field));
+            var asa = data.field;
+            var time1="["+$("#warningTime1").val().replace(" - ",",")+"]";
+            var time2="["+$("#warningTime2").val().replace(" - ",",")+"]";
+            var time3="["+$("#warningTime3").val().replace(" - ",",")+"]";
+            var time4="["+$("#warningTime4").val().replace(" - ",",")+"]";
+            var timepoint="["+time1+","+time2+","+time3+","+time4+"]";
+            // var timepoint="["+time1+",]";
+            asa["timepoint"] = timepoint;
+            $.ajax({
+                url: '/platform/add_grp',
+                method: 'post',
+                data: asa,
+                success: function (res) {
+                    // var msg = JSON.parse(res);
+                    if (res.Ret == 1) {
+                        layer.alert(res.Reason, function () {
+                            layer.closeAll();
+
+                            window.history.go(-1);
+                        });
+                    } else {
+                        layer.alert(res.Reason);
+                    }
+                },
+                error: function (data) {
+                    layer.alert("服务器连接错误");
+                }
+            });
+            return false;
+        });
+    });
+    layui.use(['element', 'form'], function () {
+        var element = layui.element;
+        var form = layui.form;
+        form.on('radio(areashape)', function (data) {
+            dragtype = data.value;
+            if(dragtype == "2"){
+                ocxDrawRect("OcxViewer1");
+            }else if(dragtype == "3"){
+                ocxDrawPolygon("OcxViewer1");
+            }
+        });
+        form.on('radio(sample)', function (data) {
+            sample = data.value;
+            sample = data.value;
+            if (sample == "1" && isSampleZ == false) {
+                isSampleZ = true;
+                clear_boundary_camera();
+                if($("#boundary").val()!=""&&$("#boundary").val()!="[]"&&$("#boundary").val()!=null){
+                    ocxPushMultiShape("OcxViewer1", html2OcxSize($('#boundary').val()));
+                }else{
+                    dragging = true;
+                }
+            }else if (sample == "2" && isSampleZ == true) {
+                isSampleZ = false;
+                clear_boundary_camera();
+                if($("#boundary2").val()!=""&&$("#boundary2").val()!="[]"&&$("#boundary2").val()!=null){
+                    ocxPushMultiShape("OcxViewer1", html2OcxSize($('#boundary2').val()));
+                }else{
+                    dragging = true;
+                }
+            }
+        });
+        form.on('select(alarm_mode)', function (obj) {
+            console.log(obj.value);
+            if (obj.value == 1) {
+                $("#divfrequency").css('display', 'block');
+            }
+            if (obj.value == 0) {
+                $("#divfrequency").css('display', 'none');
+            }
+
+        });
+        form.render('select');
+
+
+    });
+    function clear_sys_boundary() {
+        var id = UrlParam.paramValues("id");
+        $.ajax({
+            url: '/platform/delCameraFuncNegative',
+            method: 'post',
+            data: {"cameraID": id.toString()},
+            success: function (res) {
+                layer.alert(res.Reason);
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+    $(function () {
+        region();
+    });
+
+    function clear_boundary_camera() {
+        ocxClearShape("OcxViewer1");
+    }
+
+    function clear_boundary() {
+        ocxClearShape("OcxViewer1");
+        if(isSampleZ){
+            $('#boundary').val("[]");
+        }else{
+            $('#boundary2').val("[]");
+        }
+    }
+
+
+</script>
+
+</body>
+<input type="hidden" id="GetVideoStream"/>
+<input type="hidden" id="GetVideoStreamType"/>
+<input type="hidden" id="User"/>
+<input type="hidden" id="Passwd"/>
+<input type="hidden" id="Port"/>
+<input type="hidden" id="Channel"/>
+<input type="hidden" id="IP"/>
+</html>

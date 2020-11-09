@@ -1,0 +1,27 @@
+<div class="layui-side layui-bg-black" id="leftNav">
+    <div class="layui-side-scroll">
+        <!-- 左侧菜单 -->
+        <ul class="layui-nav layui-nav-tree" lay-filter="test">
+            <li class="layui-nav-item layui-nav-itemed">
+                <a href="javascript:;">过滤管理</a>
+                <dl class="layui-nav-child">
+                    <dd id="filterStation" class="menu">
+                        <a href="/filter/station">系统设置</a>
+                    </dd>
+                    <dd id="filterUser" class="menu">
+                        <a href="/filter/user">账户管理</a>
+                    </dd>
+                </dl>
+            </li>
+        </ul>
+        <input type="hidden" id="bmk" value="{{.bmk}}"/>
+    </div>
+</div>
+<script>
+    $(function(){
+        var bmk = $("#bmk").val();
+        $(".menu").removeClass("layui-this");
+        $("#" + bmk).addClass("layui-this");
+    });
+
+</script>

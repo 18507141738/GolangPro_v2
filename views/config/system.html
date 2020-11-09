@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>{{.SystemTitle}}</title>
+		<link rel="stylesheet" href="/static/layui/css/layui.css" />
+		
+	</head>
+	<script src="/static/js/jquery-3.3.1.min.js"></script>
+	<style>
+		html,body{
+			margin: 0;
+			padding: 0;
+		}
+	</style>
+	<script>
+		$(function(){
+			$.ajax({
+				async : false,
+				cache:false,
+				type: 'POST',
+				dataType : "json",
+				url: "/config/selSysinfo",//请求的action路径
+				error: function () {//请求失败处理函数
+					// alert('请求失败');
+				},
+				success:function(data){ //请求成功后处理函数。
+					var websitename = data.Reason[0].websitename;
+					var mediaserverIP = data.Reason[0].mediaserverIP;
+					var spare_switch = data.Reason[0].spare_switch;
+					$("#websitename").val(websitename);
+					$("#mediaserverIP").val(mediaserverIP);
+					if(spare_switch=="1"){
+						$("#spswitch").prop("checked",true);
+					}else{
+						$("#spswitch").prop("checked",false);
+					}
+				}
+			});
+		});
+	</script>
+	<body class="layui-layout-body">
+	<div class="layui-layout layui-layout-admin">
+		<!-- 顶部 -->
+		{{template "config/commons/header.html" .}}
+		<!-- 菜单 -->
+		{{template "config/commons/menu.html" .}}
+		<div class="layui-body">
+			<input type="hidden" id="txt1" value=""/>
+			<!-- 内容主体区域 -->
+			<div style="width: 100%;height: 100%;">
+				<div class="layui-tab-content" style="border: none">
+					<div class="layui-tab-item layui-show">
+						<div style="">
+							<blockquote class="layui-elem-quote font-weight">系统设置</blockquote>
+						</div>
+						<div style="position: absolute;top: 62px;bottom: 0px;left: 5px;right: 5px;">
+							<form class="layui-form" lay-filter="sysForm" >
+								<input type="hidden" name="spare_switch" id="spare_switch" value="0">
+								<div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+									<div class="layui-row">
+										<div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+											<span style="color: red">*</span>安防系统名称
+										</div>
+										<div class="layui-col-md8 layui-col-lg8">
+											<input class="layui-input" lay-verify="required" type="text" placeholder="请输入系统名称" name="websitename" id="websitename">
+										</div>
+									</div>
+								</div>
+								<div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+									<div class="layui-row">
+										<div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+											<span style="color: red">*</span>备用控制器地址
+										</div>
+										<div class="layui-col-md8 layui-col-lg8">
+											<input class="layui-input" lay-verify="required" type="text" placeholder="请输入流媒体服务器地址" name="mediaserverIP" id="mediaserverIP">
+										</div>
+									</div>
+								</div>
+								<div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+									<div class="layui-row">
+										<div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+											<span style="color: red">*</span>备用地址开关
+										</div>
+										<div class="layui-col-md8 layui-col-lg8">
+											<input type="checkbox" name="switch" id="spswitch" lay-skin="switch" lay-filter="spare">
+										</div>
+									</div>
+								</div>
+
+								<div style="width: 100%;height: 38px; line-height: 38px;margin: 20px auto;">
+									<div class="layui-row">
+										<div class="layui-col-md4">
+										</div>
+										<div class="layui-col-md8 layui-col-md-offset4">
+											&nbsp;<button class="layui-btn"  lay-submit lay-filter="submit">一键更新</button><span style="color: red">
+								(注意：更新系统设置数据后需要重新登陆哦~)</span>
+										</div>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<!-- 底部 -->
+		{{template "config/commons/footer.html" .}}
+	</div>
+
+	</body>
+
+	<script src="/static/layui/layui.js"></script>
+	<script>
+		layui.use(['element','layer','form'], function() {
+			var form = layui.form;
+			var layer = layui.layer;
+			form.on('switch(spare)', function(data){
+				console.log(data.elem.checked); //开关是否开启，true或者false
+				if(data.elem.checked){
+					layer.confirm('请确保此ip可以使用! 后果自负', {
+						btn: ['确定','取消'], //按钮
+						time: 20000,
+					}, function(){
+						$("#spare_switch").val("1");
+						layer.closeAll();
+					}, function(){
+						$("#spswitch").prop("checked",false);
+						form.render();
+					});
+				}else {
+					$("#spare_switch").val("0");
+				}
+
+			});
+			form.on('submit(submit)', function (data) {
+				// alert(JSON.stringify(data.field));
+				$.ajax({
+					url: '/config/updateSys',
+					method: 'post',
+					data: data.field,
+					dataType: 'JSON',
+					success: function (res) {
+						if (res.Ret == 1) {
+							layer.confirm('修改成功，点击确定刷新页面', {
+								btn: ['确定'] //可以无限个按钮
+							}, function(index){
+								location.reload();
+							});
+
+						} else {
+							layer.alert(res.Reason);
+						}
+					},
+					error: function (data) {
+						layer.alert("服务器连接错误");
+					}
+				});
+				return false;
+			});
+
+		});
+	</script>
+</html>

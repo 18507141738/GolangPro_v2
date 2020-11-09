@@ -1,0 +1,48 @@
+<div class="layui-side layui-bg-black" id="leftNav">
+    <div class="layui-side-scroll">
+        <!-- 左侧菜单 -->
+        <ul class="layui-nav layui-nav-tree" lay-filter="test">
+            <li class="layui-nav-item layui-nav-itemed">
+                <a href="javascript:;">系统设置</a>
+                <dl class="layui-nav-child">
+                    <dd id="system" class="menu"><a href="/config/systemPage" tab_id="1000">系统设置</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item layui-nav-itemed">
+                <a href="javascript:;">成员管理</a>
+                <dl class="layui-nav-child">
+                    <dd class="menu" id="orgmenu">
+                        <a href="/config/organizePage">组织成员</a>
+                    </dd>
+                </dl>
+            </li>
+
+            <li class="layui-nav-item layui-nav-itemed">
+                <a href="javascript:;">区域管理</a>
+                <dl class="layui-nav-child">
+                    <dd id="location_menu" class="menu">
+                        <a href="/config/loactionPage">区域列表</a>
+                    </dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item layui-nav-itemed">
+                <a href="javascript:;">报警管理</a>
+                <dl class="layui-nav-child">
+                    <dd id="alarm_menu" class="menu">
+                        <a href="/config/alarmSetPage">报警文案</a>
+                    </dd>
+                </dl>
+            </li>
+
+        </ul>
+        <input type="hidden" id="bmk" value="{{.bmk}}"/>
+    </div>
+</div>
+<script>
+    $(function(){
+        var bmk = $("#bmk").val();
+        $(".menu").removeClass("layui-this");
+        $("#" + bmk).addClass("layui-this");
+    });
+
+</script>

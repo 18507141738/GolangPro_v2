@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" media="screen" href="/static/css/platform.css">
+    <link rel="stylesheet" href="/static/css/zTreeStyle/zTreeStyle.css"/>
+    <link rel="stylesheet" href="/static/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/static/css/border.css"/>
+    <link href="/static/css/video-js.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/formSelects-v4.css"/>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script type="text/javascript" src="/static/js/YUVCanvas.js"></script>
+    <script type="text/javascript" src="/static/js/VJSPlayer.js"></script>
+
+    <style>
+        .borderdiv{
+            border: 1px solid #00ccff;
+            border-radius:5px;
+            box-shadow:rgb(0,59,91) 0px 0px 20px inset;
+            height: 60%;
+            background: rgba(255,255,255,0.05);
+            position:relative;
+            margin: 20px;
+        }
+        .ztree li a {
+            color: #65e0e3;
+        }
+        .layui-table-tool {
+            background: transparent;
+            border: 0px;
+        }
+        /*下拉框样式*/
+        .commontext {
+            color: #65e0e3;
+            font-size: 12px;
+            height: 30px;
+        }
+
+        .layui-form-label {
+            float: left;
+            display: block;
+            padding: 5px 15px;
+            width: 80px;
+            font-weight: 400;
+            line-height: 20px;
+            text-align: right;
+        }
+
+        .layui-form input {
+            background-color: transparent;
+            border-radius: 5px;
+            color: white;
+            height: 30px;
+            border: 1px solid #00fcf9;
+            background: transparent;
+        }
+
+        .layui-form-select dl {
+            background-color: #2F4056;
+        }
+
+        .layui-form-select dl dd {
+            color: white;
+            background: #2F4056;
+        }
+
+        .layui-form-select dl dd:hover {
+            background: #00ccff;
+        }
+
+        /*修改提示文字颜色 */
+        input::-webkit-input-placeholder {
+            color: white;
+            font-size: 12px;
+        }
+        .layui-layer-page .layui-layer-content {
+            background: #152f5b;
+            color: #ffffff;
+            border-top: 1px solid #6076ad;
+            border-bottom: 1px solid #6076ad;
+            border-left: 1px solid #6076ad;
+            border-right: 1px solid #6076ad;
+            border-radius: 5px;
+        }
+        .layui-input {
+            background-color: transparent;
+            color: #FFF;
+            border: 1px solid #00fcf9;
+            border-radius: 5px;
+            height: 35px;
+        }
+        .btn-submit {
+            border: 1px solid #00fcf9;
+            width: 100%;
+            height: 30px;
+            line-height: 30px;
+            background: #FFB800;
+        }
+        .layui-form-label {
+            color: #65e0e3;
+        }
+        .xm-select-parent .xm-input {
+            background: transparent;
+        }
+        .layui-tab-card > .layui-tab-title {
+            background-color: transparent;
+            color: #65e0e3;
+            border-color: #00fcf9;
+        }
+        .layui-tab-card > .layui-tab-title .layui-this {
+            background-color: #1E9FFF;
+            color: #f5f5f5;
+        }
+        .layui-tab-card {
+            border-color: #00fcf9;
+        }
+    </style>
+    <script>
+        function region() {
+            var id = UrlParam.paramValues("id");
+            var function_type = UrlParam.paramValues("function_type");
+            $.ajax({
+                // async : false,
+                cache:false,
+                type: 'POST',
+                dataType : "json",
+                data:{"camara_id":id.toString(),"function_type":function_type.toString()},
+                url: "/getAlgorithmList/",//请求的action路径
+                error: function () {//请求失败处理函数
+                    alert('请求失败');
+                },
+                success:function(data){ //请求成功后处理函数。
+                    var region =data.Reason[0].location;
+                    var playurl = data.Reason[0].cdconfig;
+                    var id = data.Reason[0].id;
+                    var boundary = data.Reason[0].boundary;
+                    var frequency = data.Reason[0].frequency;
+                    var threshold = data.Reason[0].threshold;
+                    var bg_threshold = data.Reason[0].bg_threshold;
+                    var perimeterThreshold = data.Reason[0].perimeterThreshold;
+                    var distance = data.Reason[0].distance;
+                    var wRate =data.Reason[0].wRate;
+                    var hRate = data.Reason[0].hRate;
+                    var DistanceMode = data.Reason[0].DistanceMode;
+                    var area_shape = data.Reason[0].area_shape;
+                    var alarm_mode=data.Reason[0].alarm_mode;
+                    var modes = eval("([" + DistanceMode + "])");
+                    var canvas = document.getElementById("myCanvas");
+                    var real_sleep_minutes = data.Reason[0].real_sleep_minutes;
+                    var alarm_time_second = data.Reason[0].alarm_time_second;
+                    var bg_thr = data.Reason[0].bg_thr;
+                    var wallrate = data.Reason[0].wallrate;
+                    $("#alarm_time_second").val(alarm_time_second);
+                    $("#bg_thr").val(bg_thr);
+                    $("#wallrate").val(wallrate);
+                    canvas.width = wRate;
+                    canvas.height = hRate;
+                    formSelects.value('DistanceMode', modes.map(String));
+                    if(alarm_mode=="1"){
+                        $("#divfrequency").css('display', 'block');
+                    }
+
+                    var timepoint = data.Reason[0].timepoint;
+                    if(timepoint!=""&&timepoint!=null){
+                        var times = timepoint.toString().split("],[");
+                        $("#warningTime1").val(times[0].toString().replace("[[","").replace("]]","").replace(","," - "));
+                        $("#warningTime2").val(times[1].toString().replace("[[","").replace("]]","").replace(","," - "));
+                        $("#warningTime3").val(times[2].toString().replace("[[","").replace("]]","").replace(","," - "));
+                        $("#warningTime4").val(times[3].toString().replace("[[","").replace("]]","").replace(","," - "));
+                    }
+
+                    layui.use('form', function() {
+                        var form = layui.form;
+                        //表单初始赋值
+                        form.val('testform', {
+                            "alarm_mode": alarm_mode,
+                            "area_shape": area_shape,
+                            "frequency": frequency,
+                            "distance":distance
+                        })
+                        $("#real_sleep_minutes").val(real_sleep_minutes);
+                        var video_switch =  data.Reason[0].video_switch;
+                        $("input[name=video_switch][value='1']").attr("checked", video_switch == 1 ? true : false);
+                        $("input[name=video_switch][value='0']").attr("checked", video_switch == 0 ? true : false);
+                        form.render();
+                    });
+                    $("#region").val(region);
+                    $("#boundary").val(boundary);
+                    $("#threshold").val(threshold);
+                    $("#bg_threshold").val(bg_threshold);
+                    $("#perimeterThreshold").val(perimeterThreshold);
+                    if (boundary != "" && boundary != null) {
+                        draw_boundary(boundary);
+                    }
+                    $("#caremaId").val(id);
+                    $("#GetVideoStream").val(data.Reason[0].algorithm_url);
+
+                    var h = '';
+                    h += '<canvas id="video_canvas" style="width: 480px;height: 270px"></canvas>';
+                    $("#vieodiv").append(h);
+                    realPlayFunc(data.Reason[0].cdconfig);
+                }
+            });
+
+        }
+        //播放rtsp视频流
+        function realPlayFunc(url) {
+            var timestamp = new Date().getTime();
+            var mcanvas = document.getElementById("video_canvas");
+            mcanvas.style.backgroundColor = "#000000";
+            //var width = 960;//canvas.width;// 960;// 1920;// 704;//
+            //var height = 540;//canvas.height;// 540;// 1080;// 576;//
+            var player = new VJSPlayer({"canvas" : mcanvas ,"width":"","height":""});
+            //close the player,if it opened!
+            player.realStop();
+
+            //start play
+            var url = url;
+            var sni = {};//StreamNetInfo
+            sni.url = url;
+            sni.protocol = 20002 //RTSP协议
+            player.realPlay(sni);
+        }
+
+    </script>
+</head>
+<body>
+<div style="width: 100%;background: url(/static/images/platform/index_bg.jpg) no-repeat; min-height: 100%;">
+    <!-- 顶部 -->
+    {{template "platform/commons/header.html" .}}
+    <div class="layui-row">
+        <div class="layui-rol-md12" style="margin-bottom: 20px">
+            <span style="color: #65e0e3; margin-left: 20px; font-size: 12px; ;">
+                <a href="/platform/centerpage" style="color: #65e0e3;">个人中心</a>&nbsp;>&nbsp;
+                <a href="/platform/centerhostmanagerpage" style="color: #65e0e3;">主机列表</a> &nbsp;>&nbsp;
+                <a href="javascript:window.history.back();" style="color:#65e0e3;">摄像头列表</a> &nbsp;>&nbsp;
+                睡岗监控配置
+            </span>
+        </div>
+
+        <div class="layui-col-md12">
+            <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+                    <div style="border-image: url(/static/images/img_titile_bg.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                        <div class="h-table" style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                            <div class="h-cell">
+                                睡岗监控配置
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+                <input type="hidden" id="moshi">
+                <input type="hidden" id="zuobiao">
+                <div style="top: 62px;bottom: 0px;left: 5px;right: 5px;">
+                    <div class="layui-row" style="height: 100%">
+                        <div class="layui-col-md6">
+                            <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+
+                                <div style="height: 88px;width: 100%;background: transparent; color: #F5F5F5">
+                                    <div id="duobian">
+                                        <form class="layui-form" action="" >
+                                            <div class="layui-form-item" style="margin-bottom: 5px">
+                                                <label class="layui-form-label"
+                                                       style="padding-left: 0px;padding-right: 0px; margin-top: 5px;">区域形状:</label>
+                                                <div class="layui-input-block">
+                                                    <input type="radio" name="areashape" value="2" title="四边形" checked
+                                                           lay-filter="areashape">
+                                                    <input type="radio" name="areashape" value="3" title="多边形"
+                                                           lay-filter="areashape">
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div style="width:100%;position: relative; left: 20px; top: 10px;" >
+                                    <div id="vieodiv" ></div>
+                                    <canvas id="myCanvas" style="position: absolute;top: 0px;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="layui-col-md6">
+                            <div class="borderdiv layui-row" style="padding: 20px 0px 20px 0px;">
+                                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+
+                                <form class="layui-form" id="securityform" style="padding-right: 20px;" id="formC" lay-filter="testform">
+                                    <input type="hidden" name="function_type" value="sleep_count">
+                                    <input type="hidden" id="caremaId" name="id">
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">监控区域:</label>
+                                        <div class="layui-input-block">
+                                            <input id="region" name="location" type="text" class="layui-input"
+                                                   placeholder="请输入防盗区域" lay-verify="required"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">坐标:</label>
+                                        <div class="layui-input-block">
+                                            <input name="boundary" id="boundary" type="text" class="layui-input" placeholder=""
+                                                   lay-verify="required"/>
+                                        </div>
+                                    </div>
+{{/*                                    <div id="force" >*/}}
+{{/*                                        <div class="layui-form-item">*/}}
+{{/*                                            <label class="layui-form-label">人形框与报警框的重合比例:</label>*/}}
+{{/*                                            <div class="layui-input-block" >*/}}
+{{/*                                                <input name="wallrate" id="wallrate" type="text" class="layui-input"*/}}
+{{/*                                                       placeholder=""/>*/}}
+{{/*                                            </div>*/}}
+{{/*                                        </div>*/}}
+{{/*                                    </div>*/}}
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">动作幅度:</label>
+                                        <div class="layui-input-block">
+                                            <input name="threshold" id="threshold" type="text" class="layui-input" placeholder=""
+                                                   lay-verify="required"/>
+                                        </div>
+                                    </div>
+{{/*                                    <div class="layui-form-item">*/}}
+{{/*                                        <label class="layui-form-label">背景减除的阈值:</label>*/}}
+{{/*                                        <div class="layui-input-block">*/}}
+{{/*                                            <input name="bg_thr" id="bg_thr" type="text" class="layui-input" placeholder=""*/}}
+{{/*                                                   lay-verify="required"/>*/}}
+{{/*                                        </div>*/}}
+{{/*                                    </div>*/}}
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">确定睡眠分钟数:</label>
+                                        <div class="layui-input-block">
+                                            <input name="real_sleep_minutes" id="real_sleep_minutes" type="text" class="layui-input" placeholder=""
+                                                   lay-verify="required"/>
+                                        </div>
+                                    </div>
+{{/*                                    <div class="layui-form-item" >*/}}
+{{/*                                        <label class="layui-form-label">检测目标距离:</label>*/}}
+{{/*                                        <div class="layui-input-block">*/}}
+{{/*                                            <select id="DistanceMode" name="DistanceMode"*/}}
+{{/*                                                    lay-verify="required" >*/}}
+{{/*                                                <option value="0">远(8-25米)</option>*/}}
+{{/*                                                <option value="1">中(4-16米)</option>*/}}
+{{/*                                            </select>*/}}
+{{/*                                        </div>*/}}
+{{/*                                    </div>*/}}
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">监测目标距离:</label>
+                                        <div class="layui-input-block">
+                                            <input id="distance" name="distance" type="text" value="1.0" class="layui-input" placeholder="" lay-verify="required"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警模式:</label>
+                                        <div class="layui-input-block">
+                                            <select id="alarm_mode" name="alarm_mode" class="layui-select"
+                                                    lay-filter="alarm_mode">
+                                                <option value="">请选择报警模式</option>
+                                                <option value="0">持续报警（默认为15秒/次）</option>
+                                                <option value="1">频率报警</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="divfrequency" style="display: none">
+                                        <div class="layui-form-item">
+                                            <label class="layui-form-label">报警频率(分):</label>
+                                            <div class="layui-input-block">
+{{/*                                                <select id="frequency" name="frequency" class="layui-select"*/}}
+{{/*                                                        lay-filter="alarmFrequency" >*/}}
+{{/*                                                    <option value="">请选择报警频率</option>*/}}
+{{/*                                                    <option value="30">30秒1次</option>*/}}
+{{/*                                                    <option value="60">1分钟1次</option>*/}}
+{{/*                                                    <option value="120">2分钟1次</option>*/}}
+{{/*                                                </select>*/}}
+                                                <input id="frequency" name="frequency" idlay-filter="alarmFrequency" type="text" class="layui-input" value="15"></input>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警时间:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" placeholder="请选择报警时间" class="layui-input test-item" id="warningTime1" lay-key="1"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警时间:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" placeholder="请选择报警时间" class="layui-input test-item" id="warningTime2" lay-key="2"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警时间:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" placeholder="请选择报警时间" class="layui-input test-item" id="warningTime3" lay-key="3"/>
+                                        </div>
+                                    </div>
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">报警时间:</label>
+                                        <div class="layui-input-block">
+                                            <input type="text" placeholder="请选择报警时间" class="layui-input test-item" id="warningTime4" lay-key="4"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="layui-form-item">
+                                        <label class="layui-form-label">是否存储短视频:</label>
+                                        <div class="layui-input-block" id="whole" style="color: #F5F5F5">
+                                            <input type="radio" name="video_switch" value="1" title="是" checked>
+                                            <input type="radio" name="video_switch" value="0" title="否" >
+                                        </div>
+                                    </div>
+{{/*                                    <div class="layui-form-item">*/}}
+{{/*                                        <label class="layui-form-label">报警时长(秒):</label>*/}}
+{{/*                                        <div class="layui-input-block">*/}}
+{{/*                                            <input name="alarm_time_second" id="alarm_time_second" type="number" class="layui-input" placeholder="" />*/}}
+{{/*                                        </div>*/}}
+{{/*                                    </div>*/}}
+
+                                    <div class="layui-form-item">
+                                        <div class="layui-input-block">
+                                            <button class="layui-btn" type="button" lay-submit lay-filter="formDemo">确定</button>
+                                            <button type="button" class="layui-btn  layui-btn-danger "
+                                                    onclick="clear_boundary()">清空区域
+                                            </button>
+                                            <!-- <button class="layui-btn" type="button" onclick="addTimes()">添加时间段</button> -->
+                                        </div>
+                                    </div>
+
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/static/layui/layui.js"></script>
+<script src="/static/js/formSelects-v4.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+    var formSelects = layui.formSelects;
+
+    layui.use('laydate', function(){
+        var laydate = layui.laydate;
+        //同时绑定多个
+        lay('.test-item').each(function(){
+            laydate.render({
+                elem: this
+                ,type: 'time'
+                ,range: true,
+                format: 'HH:mm'
+                ,trigger: 'click'
+            });
+        });
+    });
+</script>
+<script type="text/JavaScript" language="javascript" for="TestOcx" event="EventCallBack(szValue)">
+    // window.test = szValue;
+    var jsonObj = JSON.parse(szValue);
+    var data= jsonObj.PointList;
+    if( $("#boundary").val()=="[]"||$("#boundary").val()==""||$("#boundary").val()==null){
+        var boundary="[";
+        for (var i = 0; i < data.length; i++) {
+            //data[i]表示获得第i个json对象即JSONObject
+            //data[i]通过.字段名称即可获得指定字段的值
+            boundary+="["+data[i].x+","+data[i].y+"],";
+
+        }
+        boundary=boundary.substring(0,boundary.length-1);
+        boundary+="];"
+    }else{
+        var boundary="[";
+        for (var i = 0; i < data.length; i++) {
+            //data[i]表示获得第i个json对象即JSONObject
+            //data[i]通过.字段名称即可获得指定字段的值
+            boundary+="["+data[i].x+","+data[i].y+"],";
+
+        }
+        boundary=boundary.substring(0,boundary.length-1);
+        boundary+="];"
+        boundary=$("#boundary").val()+boundary;
+    }
+    $("#boundary").val(boundary);
+</script>
+<script>
+
+    layui.use('form', function () {
+        var form = layui.form;
+        //监听提交
+        form.on('submit(formDemo)', function (data) {
+            // parent.layer.alert(JSON.stringify(data.field));
+            var asa = data.field;
+            var time1="["+$("#warningTime1").val().replace(" - ",",")+"]";
+            var time2="["+$("#warningTime2").val().replace(" - ",",")+"]";
+            var time3="["+$("#warningTime3").val().replace(" - ",",")+"]";
+            var time4="["+$("#warningTime4").val().replace(" - ",",")+"]";
+            var timepoint="["+time1+","+time2+","+time3+","+time4+"]";
+            asa["timepoint"] = timepoint;
+            $.ajax({
+                url: '/platform/add_grp',
+                method: 'post',
+                data: asa,
+                success: function (res) {
+                    // var msg = JSON.parse(res);
+                    if (res.Ret == 1) {
+                        layer.alert(res.Reason, function () {
+                            layer.closeAll();
+
+                            window.history.go(-1);
+                        });
+                    } else {
+                        layer.alert(res.Reason);
+                    }
+                },
+                error: function (data) {
+                    layer.alert("服务器连接错误");
+                }
+            });
+            return false;
+        });
+    });
+    layui.use(['element', 'form'], function () {
+        var element = layui.element;
+        var form = layui.form;
+        form.on('radio(areashape)', function (data) {
+
+            dragtype = data.value;
+
+        });
+
+        form.on('select(alarm_mode)', function (obj) {
+            console.log(obj.value);
+            if (obj.value == 1) {
+                $("#divfrequency").css('display', 'block');
+            }
+            if (obj.value == 0) {
+                $("#divfrequency").css('display', 'none');
+            }
+
+        });
+        form.render('select');
+        form.on('select(areaShape)', function (obj) {
+            console.log(obj.value);
+            dragtype = obj.value;
+            clear_boundary();
+        });
+
+    });
+    $(function () {
+        region();
+    });
+
+</script>
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var context = canvas.getContext("2d");
+    var drawingSurfacsImageData = null;
+    var mousedowns = []; //此处是周界坐标的值
+    var mousedown = {};
+    var rubberbandRect = {};
+    var dragging = true;
+    var loc = null;
+    var dragtype = 2; //代表区域形状1:直线 2:四边形 3多边形
+
+    //获取实际的鼠标在canvas的位置
+    function windowToCanvas(x, y) {
+        var bbox = canvas.getBoundingClientRect();
+        return {
+            x: x - bbox.left * (canvas.width / bbox.width),
+            y: y - bbox.top * (canvas.height / bbox.width)
+        };
+    }
+
+    //保存当前的canvas上的数据
+    function saveDrawingSurface() {
+        drawingSurfacsImageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    }
+
+    //恢复canvas的数据，主要用来显示最新的线段，擦除原来的线段
+    function restoreDrawingSurface() {
+        context.putImageData(drawingSurfacsImageData,
+            0, 0, 0, 0, canvas.width, canvas.height
+        );
+    }
+
+    //应该是计算需要偏移的量???
+    function updateRubberbandRectangle(loc) {
+
+        rubberbandRect.width = Math.abs(loc.x - mousedown.x);
+        rubberbandRect.height = Math.abs(loc.y - mousedown.y);
+        if (loc.x > mousedown.x) {
+            rubberbandRect.left = mousedown.x;
+        } else {
+            rubberbandRect.left = loc.x;
+        }
+        if (loc.y > mousedown.y) {
+            rubberbandRect.top = mousedown.y;
+        } else {
+            rubberbandRect.top = loc.y;
+        }
+
+        console.log("mousedown.x=" + mousedown.x + ",mousedown.y=" + mousedown.y + ",loc.x=" + loc.x + ",loc.y=" + loc.y);
+    }
+
+    //更新
+    function updateRubberband(loc) {
+        //此处在《HTML5 canvas核心技术——图形、动画与游戏开发》一书中
+        //updateRubberbandRectangle方法是没有注释的
+        //updateRubberbandRectangle(loc);
+
+        drawRubberbandShape(loc);
+    }
+
+    //画最新的线条
+    function drawRubberbandShape(loc) {
+        context.beginPath();
+        context.moveTo(mousedown.x, mousedown.y);
+        context.lineTo(loc.x, loc.y);
+        context.stroke();
+    }
+
+    //根据返回值画范围
+    function draw_boundary(array) {
+        // array=[[169,56],[275,119],[262,250],[161,182],[169,56]];
+        var boundarys = array.toString().split(";");
+        for (var i = 0; i < boundarys.length; i++) {
+            if (boundarys[i].toString() != "") {
+                array = eval("(" + boundarys[i].toString() + ")");
+                if (array.length > 0) {
+                    context.strokeStyle = 'red';
+                    dragging = false;
+                    for (var index_a = 0; index_a < array.length - 1; index_a++) {
+
+                        var start = array[index_a];
+                        var end = array[index_a + 1];
+                        console.log('' + start[0] + ' ' + start[1]);
+
+                        context.beginPath();
+                        context.moveTo(start[0], start[1]);
+                        context.lineTo(end[0], end[1]);
+                        context.stroke();
+                    }
+                }
+            }
+
+        }
+    }
+
+    //清空画布
+    function clear_boundary() {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        drawingSurfacsImageData = null;
+        mousedowns = [];
+        mousedown = {};
+        rubberbandRect = {};
+        dragging = true;
+        loc = null;
+        $('#boundary').val("[]");
+    }
+
+    //鼠标点下
+    canvas.onmousedown = function (e) {
+        //loc = windowToCanvas(e.clientX, e.clientY);
+        context.strokeStyle = 'red';
+        if (dragging && dragtype != 0) {
+
+            loc = {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+
+            e.preventDefault();
+            saveDrawingSurface();
+            mousedown.x = loc.x;
+            mousedown.y = loc.y;
+
+            //-------此处开始向页面添加坐标点------------
+
+            mousedowns.push(loc);
+
+            //判断直线/四边形/多边形
+            if (dragtype == 1 && mousedowns.length == 2) { //直线
+                dragging = false;
+            } else if (dragtype == 2 && mousedowns.length == 4) { //四边形
+                var mousestart = mousedowns[0];
+                var min_x = Math.abs(mousedown.x - mousestart.x);
+                var min_y = Math.abs(mousedown.y - mousestart.y);
+                dragging = false;
+                drawRubberbandShape(mousestart);
+                //-----------此处关闭画线,想页面添加封闭点也就是最开始那一个点-------------
+                mousedowns.push(mousestart);
+                var str = '';
+                for (var i=0;i<mousedowns.length;i++) {
+                    if (str === '') {
+                        str = '[' + parseInt(mousedowns[i].x) + ',' + parseInt(mousedowns[i].y) + ']';
+                    } else {
+                        str = str + ',[' + parseInt(mousedowns[i].x) + ',' + parseInt(mousedowns[i].y) + ']';
+                    }
+
+                }
+                console.log(str);
+                if ($('#boundary').val() == "[]") {
+                    var boundary = '[' + str + ']' + ";";
+                } else {
+                    var boundary = $('#boundary').val() + '[' + str + ']' + ";";
+                }
+                $('#boundary').val(boundary);
+                drawingSurfacsImageData = null;
+                mousedowns = [];
+                mousedown = {};
+                rubberbandRect = {};
+                dragging = true;
+                loc = null;
+            } else if (dragtype == 3 && mousedowns.length > 2) { //多边形
+                var mousestart = mousedowns[0];
+                var min_x = Math.abs(mousedown.x - mousestart.x);
+                var min_y = Math.abs(mousedown.y - mousestart.y);
+                console.log(mousedowns);
+                console.log(min_x + ',' + min_y)
+                if (min_x < 10 & min_y < 10) {
+                    dragging = false;
+                    drawRubberbandShape(mousestart);
+                    //-----------此处关闭画线,想页面添加封闭点也就是最开始那一个点-------------
+                    mousedowns.push(mousestart);
+                    var str = '';
+                    for (var i=0;i<mousedowns.length;i++) {
+                        if (str === '') {
+                            str = '[' + parseInt(mousedowns[i].x) + ',' + parseInt(mousedowns[i].y) + ']';
+                        } else {
+                            str = str + ',[' + parseInt(mousedowns[i].x) + ',' + parseInt(mousedowns[i].y) + ']';
+                        }
+
+                    }
+                    console.log(str);
+                    if ($('#boundary').val() == "[]") {
+                        var boundary = '[' + str + ']' + ";";
+                    } else {
+                        var boundary = $('#boundary').val() + '[' + str + ']' + ";";
+                    }
+                    $('#boundary').val(boundary);
+                    drawingSurfacsImageData = null;
+                    mousedowns = [];
+                    mousedown = {};
+                    rubberbandRect = {};
+                    dragging = true;
+                    loc = null;
+                }
+            }
+        }
+    };
+
+    canvas.onmousemove = function (e) {
+        //判断当前是否用户在拖动
+        if (dragging && mousedowns.length > 0) {
+            e.preventDefault();
+            //loc = windowToCanvas(e.clientX, e.clientY);
+            loc = {
+                x: e.offsetX,
+                y: e.offsetY
+            };
+
+            restoreDrawingSurface();
+            updateRubberband(loc);
+        }
+    };
+
+    context.strokeStyle = 'red';
+</script>
+</body>
+<input type="hidden" id="GetVideoStream"/>
+<input type="hidden" id="GetVideoStreamType"/>
+<input type="hidden" id="User"/>
+<input type="hidden" id="Passwd"/>
+<input type="hidden" id="Port"/>
+<input type="hidden" id="Channel"/>
+<input type="hidden" id="IP"/>
+</html>

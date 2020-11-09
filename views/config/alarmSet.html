@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css" />
+
+</head>
+<script src="/static/js/jquery-3.3.1.min.js"></script>
+<script src="/static/layui/layui.js"></script>
+<style>
+    html,body{
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!-- 顶部 -->
+    {{template "config/commons/header.html" .}}
+    <!-- 菜单 -->
+    {{template "config/commons/menu.html" .}}
+    <div class="layui-body">
+        <div id="bodycon">
+            <div style="padding: 5px;">
+                <blockquote class="layui-elem-quote font-weight">报警文案</blockquote>
+            </div>
+            <div style="position: absolute;top: 62px;bottom: 0px;left: 5px;right: 5px;">
+                <table id="list" lay-filter="list"></table>
+            </div>
+        </div>
+    </div>
+    <!-- 底部 -->
+    {{template "config/commons/footer.html" .}}
+</div>
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+        <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">删除</button>
+    </div>
+</script>
+<script type="text/html" id="bar">
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">修改</a>
+</script>
+</body>
+
+<script>
+    layui.use(['element','table'], function(){
+        var table = layui.table;
+        var form = layui.form;
+
+        table.render({
+            elem: '#list',
+            url: '/config/alarmDetailSel', //接口地址
+            toolbar: "#toolbar",
+            method: "post",
+            defaultToolbar: '',
+            cellMinWidth: 80,
+            cols: [
+                [{checkbox: true},
+                    {
+                        field: 'ID',
+                        title: 'ID',
+                        align: 'center',
+                        hide:true
+                    },
+                    {
+                        field: 'Type',
+                        title: '告警类型',
+                        align: 'center',
+                        width: 200,
+                        templet: function (d) {
+                            var text = "--";
+                            if (d.Type == "queue_count") {
+                                text = "离岗监测";
+                            }else if (d.Type === 'sleep_count') {
+                                text = "睡岗监测";
+                            }else if (d.Type === 'fire') {
+                                text = "火焰监测";
+                            }else if (d.Type === 'smoke') {
+                                text = "烟雾监测";
+                            }else if (d.Type === 'boundary') {
+                                text = "区域入侵";
+                            }else if (d.Type === 'cloths') {
+                                text = "着装监控";
+                            }else if (d.Type === 'leakage') {
+                                text = "泄漏监测";
+                            }
+                            return text;
+                        }
+                    },
+                    {
+                        field: 'Detail',
+                        title: '告警预设文案',
+                        align: 'center',
+                    },
+                    {
+                        title: '操作',
+                        align: 'center',
+                        toolbar: '#bar',
+                        width: 80
+                    }
+                ]
+            ],
+            parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                return {
+                    "code": res.Code, //解析接口状态
+                    "data": res.Reason,//解析数据列表
+                    "count":res.Num
+                };
+            }
+        });
+
+        //头工具栏事件
+        table.on('toolbar(list)', function(obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case "add":
+                    layer.open({
+                        type: 1,
+                        title: "添加告警文案",
+                        area: ['400px', '260px'],
+                        content: $("#view"),
+                        success: function(index, layero) {
+                            $("#view").removeClass("layui-hide");
+
+                            form.val('alarmset', {
+                                "id": "",
+                                "code": "0",
+                                "type": "",
+                                "detail": ""
+                            });
+                        },
+                        cancel: function(index, layero){
+                            layer.close(index);
+                        }
+                    });
+                    break;
+                case "del":
+                    if (checkStatus.data.length == 0) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择要删除的数据'
+                        });
+                        return;
+                    }
+                    var array = checkStatus.data;
+                    var arrParse = array;
+                    var ids = "";
+                    for (var i = 0; i < arrParse.length; i++) {
+                        ids += arrParse[i].ID + ",";
+                    }
+                    var param = {"ids": ids};
+                    layer.open({
+                        title: "删除",
+                        content: "确认删除告警文案",
+                        btn: ["确认","取消"],
+                        yes :function(index, layero){
+                            $.ajax({
+                                url: '/config/alarmDetailDel',
+                                method: 'post',
+                                data: param,
+                                dataType: 'JSON',
+                                success: function (res) {
+                                    if (res.Ret == 1) {
+                                        layer.alert(res.Reason, function () {
+                                            layer.closeAll();
+                                            table.reload('list');
+                                            // table.reload('testReload', {
+                                            //     page: {
+                                            //         curr: 1 //重新从第 1 页开始
+                                            //     }
+                                            // });
+                                        });
+                                    } else {
+                                        layer.alert(res.Reason);
+                                    }
+                                },
+                                error: function (data) {
+                                    layer.alert("服务器连接错误");
+                                }
+                            });
+                        },
+                        btn2  :function(index, layero){
+                            layer.close(index);
+                        }
+                    });
+                    break;
+            }
+
+        });
+
+        table.on("tool(list)", function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+                layer.open({
+                    type: 1,
+                    title: "添加告警文案",
+                    area: ['400px', '260px'],
+                    content: $("#view"),
+                    success: function(index, layero) {
+                        $("#view").removeClass("layui-hide");
+                        form.val('alarmset', {
+                            "id": data.ID,
+                            "code": "1",
+                            "type": data.Type,
+                            "detail": data.Detail
+                        });
+                        // form.render();
+                    },
+                    cancel: function(index, layero){
+                        layer.close(index);
+                    }
+                });
+            }
+        });
+
+        form.on("submit(save)", function (data) {
+            var url = "/config/alarmDetailAdd";
+            var code = $("#code").val();
+            if (code == "1") {
+                url = "/config/alarmDetailEdit"
+            }
+
+            $.ajax({
+                url: url,
+                method: 'post',
+                data: data.field,
+                success: function (res) {
+                    if (res.Ret == "1") {
+                        layer.closeAll();
+                        table.reload('list');
+                    }else{
+                        layer.alert(res.Reason);
+                    }
+                },
+                error: function (data) {
+                    layer.alert("服务器连接错误");
+                }
+            });
+            return false;
+        });
+        
+    });
+
+    
+</script>
+
+<div style="background: white;display: none;" id="view">
+    <form class="layui-form" style="padding: 20px"  lay-filter="alarmset">
+        <input type="hidden" id="id" name="id">
+        <input type="hidden" id="code" value="0" name="code"><!--0注册1修改-->
+        <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+            <div class="layui-row">
+                <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                    <span>功能类型</span>
+                </div>
+                <div class="layui-col-md8 layui-col-lg8">
+                    <select id="type" name="type" lay-filter="type" lay-verify="required">
+                        <option value="queue_count">离岗监测</option>
+                        <option value="sleep_count">睡岗监测</option>
+                        <option value="fire">火焰监测</option>
+                        <option value="smoke">烟雾监测</option>
+                        <option value="boundary">区域入侵</option>
+                        <option value="cloths">着装监控</option>
+{{/*                        <option value="leakage">泄漏监测</option>*/}}
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div style="width: 100%;height: 38px; line-height: 38px;margin: 0px auto;">
+            <div class="layui-row">
+                <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                    <span>告警文案</span>
+                </div>
+                <div class="layui-col-md8 layui-col-lg8">
+                    <input name="detail" id="detail" class="layui-input" type="text" placeholder="请输入告警文案" lay-verify="required"/>
+                </div>
+            </div>
+        </div>
+       
+
+        <div style="text-align: center;margin:20px;">
+            <button type="button" class="layui-btn" lay-submit lay-filter="save">保存</button>
+            <button type="button" class="layui-btn" onclick="cancel()">取消</button>
+        </div>
+    </form>
+</div>
+
+</html>

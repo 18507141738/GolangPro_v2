@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" media="screen" href="/static/css/platform.css">
+    <link rel="stylesheet" href="/static/layui/css/layui.css"/>
+    <link rel="stylesheet" href="/static/css/border.css"/>
+    <link rel="stylesheet" href="/static/css/table.css"/>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/layui/layui.js"></script>
+    <script src="/static/js/echarts.min.js"></script>
+    <link href="/static/css/video-js.css" rel="stylesheet">
+    <script src="/static/js/video.js"></script>
+    <script type="text/javascript" src="/static/js/YUVCanvas.js"></script>
+    <script type="text/javascript" src="/static/js/VJSPlayer.js"></script>
+</head>
+<style>
+    html,body{
+        min-width: 1200px;
+    }
+    .borderdiv {
+        border: 1px solid #4574d6;
+        border-radius: 5px;
+        box-shadow: rgb(0, 59, 91) 0px 0px 20px inset;
+        background: rgba(255, 255, 255, 0.05);
+        position: relative;
+        margin-top: 30px;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    .layui-tab-title .layui-this {
+        color: white;
+    }
+
+    .layui-layer-page .layui-layer-content {
+        background: #152f5b;
+        color: #ffffff;
+        border-top: 1px solid #6076ad;
+        border-bottom: 1px solid #6076ad;
+        border-left: 1px solid #6076ad;
+        border-right: 1px solid #6076ad;
+        border-radius: 5px;
+    }
+
+    .dialogborderdiv {
+        border: 1px solid #00ccff;
+        border-radius: 5px;
+        box-shadow: rgb(0, 59, 91) 0px 0px 20px inset;
+        height: 60%;
+        background: rgba(255, 255, 255, 0.05);
+        position: relative;
+        margin: 20px;
+    }
+
+    /*下拉框样式*/
+    .commontext {
+        color: #65e0e3;
+        font-size: 12px;
+        height: 30px;
+    }
+
+    .layui-form-label {
+        float: left;
+        display: block;
+        padding: 5px 15px;
+        width: 80px;
+        font-weight: 400;
+        line-height: 20px;
+        text-align: right;
+    }
+
+    .layui-form input {
+        background-color: transparent;
+        border-radius: 5px;
+        width: 120px;
+        color: white;
+        height: 30px;
+        border: 1px solid #00fcf9;
+        background: transparent;
+    }
+
+    .layui-form-select dl {
+        background-color: #2F4056;
+    }
+
+    .layui-form-select dl dd {
+        color: white;
+        background: #2F4056;
+    }
+
+    .layui-form-select dl dd:hover {
+        background: #00ccff;
+    }
+
+    /*修改提示文字颜色 */
+    input::-webkit-input-placeholder {
+        color: white;
+        font-size: 12px;
+    }
+
+    .layui-table-grid-down {
+        display: none;
+    }
+
+    .layui-tab-content {
+        padding: 0px;
+    }
+
+    /*下拉框样式*/
+
+    /**图表样式*/
+    .alarm-content {
+        background:rgb(8,46,88);
+        font-size: 12px;
+        border-radius: 5px;
+        padding: 2px 20px;
+        height: 30px;
+        line-height: 30px;
+    }
+</style>
+<body class="hideScrollY">
+<div style="width: 100%;background: url(/static/images/platform/index_bg.jpg) no-repeat;background-size: 100% 100%;">
+    <input type="hidden" id="alarm_place_type">
+    <input type="hidden" id="zid">
+    <input type="hidden" id="alarm_time">
+    <!-- 顶部 -->
+    {{template "filter/commons/header.html" .}}
+
+    <div>
+
+        <form class="layui-form" action="" lay-filter="regionform">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label commontext">组织单位:</label>
+                    <div class="layui-input-block" style="width: 120px">
+                        <select id="organize" name="organize" lay-filter="organize" lay-verify="required">
+                            <option value="">请选择</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
+    <div class="borderdiv" style="padding: 0px 0px 20px 0px;height: 300px">
+
+        <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+            <div style="border-image: url(/static/images/img_titile_bg.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                <div class="h-table"
+                     style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                    <div class="h-cell">
+                        事件图表
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+        <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+        <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+        <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+        <div id="char4" style="width: 100%; height: 100%;"></div>
+    </div>
+    <div class="borderdiv" style="padding: 0px 0px 20px 0px;">
+
+        <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+            <div style="border-image: url(/static/images/img_titile_bg.png) 14 fill /10px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                <div class="h-table"
+                     style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                    <div class="h-cell">
+                        事件列表
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+        <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+        <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+        <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+        <div style="margin-top: 30px">
+            <form class="layui-form" action="" lay-filter="formdata">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label commontext">选择时间:</label>
+                        <div class="layui-input-block" style="width: 160px">
+                            <input style="width: 160px" type="text" name="title" required lay-verify="required"
+                                   placeholder="请选择时间"
+                                   autocomplete="off" class="layui-input commontext" id="test1">
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label commontext">状态:</label>
+                        <div class="layui-input-block">
+                            <select id="status" name="status" lay-verify="required" lay-filter="status" >
+                                <option value="0" >未处理</option>
+                                <option value="1" >已插入</option>
+                                <option value="2" >误报</option>
+                                <option value="-1" >全部</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label commontext">摄像机:</label>
+                        <div class="layui-input-block">
+                            <select id="cameraList" name="cameraList" lay-verify="required" lay-filter="cameraList" >
+                                <option value="0" >全部</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+            <div class="borderdiv" style="margin-top: 5px">
+                <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+                <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+                <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+                <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+                <table class="layui-hide" id="alarmTable" lay-filter="alarmTable"></table>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<input type="hidden" class="layui-hide" id="zId">
+<input type="hidden" class="layui-hide" id="funcType">
+</body>
+
+<div style="padding-top: 15px; box-shadow:rgb(0,59,91) 0px 0px 20px inset;" class="layui-hide" id="alermInfo">
+    <input type="hidden" id="alarm_stream">
+    <input type="hidden" id="alarm_video">
+    <div class="dialogborderdiv layui-row" style="padding: 20px 0px 0px 0px;">
+        <div style="width: 100%;height: 40px;position: absolute;top: -25px;">
+            <div style="border-image: url(/static/images/img_titile_bg.png) 20 fill /14px stretch;width: 14%;height: 40px;margin: 0 auto;">
+                <div class="h-table"
+                     style="width: 100%;height: 100%;text-align: center;color: white;font-size: 1.2rem;">
+                    <div class="h-cell">
+                        事件详情
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fltdecarround fltdecarroundleft fltdecarroundtop"></div>
+        <div class="fltdecarround fltdecarroundtop fltdecarroundright "></div>
+        <div class="fltdecarround fltdecarroundleft fltdecarroundbottom"></div>
+        <div class="fltdecarround fltdecarroundbottom fltdecarroundright "></div>
+
+        <div class="layui-tab" lay-filter="alarmTab">
+            <ul class="layui-tab-title">
+                <li class="layui-this" lay-id="alarmTabpic">图片</li>
+                <li class="">短视频</li>
+                <li class="">直播</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show" style="text-align: center">
+                    <img src="" id="tcImage" style="height:270px; width: 480px; margin-top: 10px;" onclick="pic()"/>
+                </div>
+                <div class="layui-tab-item">
+                    <div id="vieodiv" style="padding: 10px; text-align: center;">
+                        <div id="sdk_div">
+{{/*                            <canvas id="h_canvas" style="width: 480px;height: 270px" width="480" height="270" ondblclick="hfullscreen()"></canvas>*/}}
+                        </div>
+                        <div id="video_div" class="layui-hide">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-tab-item">
+                    <div id="streamdiv" style="padding: 10px; text-align: center;">
+
+                    </div>
+                    <div id="rtspdiv" style="padding: 10px; text-align: center; display: none;">
+{{/*                        <canvas id="video_canvas" style="width: 480px;height: 270px" ondblclick="fullscreen()"></canvas>*/}}
+                    </div>
+                </div>
+            </div>
+            <div style="border: 1px solid #00fcf9;height: 240px;margin: 20px">
+                <div style="text-align: center;color: #fb7b08; margin-top: 20px; margin-bottom: 10px">告警信息</div>
+                <div class="layui-row">
+                    <div class="layui-col-md6 layui-col-sm6" style="padding: 5px 10px">
+                        <div class="alarm-content slh-div" id="alarm_detail_time"></div>
+                    </div>
+                    <div class="layui-col-md6 layui-col-sm6" style="padding: 5px 10px">
+                        <div class="alarm-content slh-div" id="alarm_detail_type"></div>
+                    </div>
+                </div>
+                <div class="layui-row">
+                    <div class="layui-col-md" style="padding: 5px 10px">
+                        <div class="alarm-content slh-div" id="alarm_detail_name"></div>
+                    </div>
+                </div>
+                <div class="layui-row">
+                    <div class="layui-col-md" style="padding: 5px 10px">
+                        <div class="alarm-content slh-div" id="alarm_detail_content"></div>
+                    </div>
+                </div>
+                <div class="layui-row" style="margin-top: 10px;" id="anniu">
+                    <div class="" style="padding: 5px 10px;text-align: center;">
+                        <button id="chulibtn" type="button" class="layui-btn layui-btn-sm" style="width: 120px" onclick="insertAlarm()">插入</button>
+                        <button id="chulibtn" type="button" class="layui-btn layui-btn-sm" style="width: 120px" onclick="misinformation()">误报</button>
+                    </div>
+                </div>
+            </div>
+            <div class="xw-alert-text" style="color: yellow;width: 100%;text-align: center;">（第一次使用下载<a style="color: #F5F5F5" href="/static/exe.zip">WebControl3-x86_x64-v2</a>插件）</div>
+        </div>
+    </div>
+</div>
+<script src="/static/js/common.js" type="text/javascript"></script>
+
+<script>
+    $("#funcType").val(UrlParam.paramValues("type"));
+    // layui.config({base:'/static/layui/lay/tablePlug/'}).use('tablePlug',function(){
+    //
+    // });
+    layui.use(['laydate', 'table','laydate'], function () {
+        var laydate = layui.laydate;
+        var table = layui.table;
+
+        $.ajax({
+            url: '/filter/selorg',
+            method: 'post',
+            dataType: 'JSON',
+            success: function (res) {
+                // console.log(JSON.stringify(res.Reason));
+                $("#organize").empty(); // 清空省内选项
+                var data = res.Reason;
+                for (var j=0; j<data.length; j++) {
+
+                    $("#organize").append('<option value="' + data[j].ID + '">' + data[j].Name + '</option>');
+                    if(j==0){
+                        alarmLine(data[j].ID);//查询数据
+                    }
+                }
+                form.render("select",'regionform');
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+
+        $.ajax({
+            url: '/filter/selCameraForFuncType',
+            method: 'post',
+            data: {funcType: $("#funcType").val()},
+            dataType: 'JSON',
+            success: function (res) {
+                // console.log(JSON.stringify(res.Reason));
+                $("#cameraList").empty(); // 清空省内选项
+                $("#cameraList").append('<option value="0">全部</option>');
+                if (res.Ret == '1') {
+                    var data = res.Data;
+                    for (var j=0; j<data.length; j++) {
+                        $("#cameraList").append('<option value="' + data[j].ID + '">' + data[j].Name + '</option>');
+                    }
+                }
+                form.render("select",'formdata');
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+
+        //执行一个laydate实例
+        var start = laydate.render({
+            elem: '#test1'
+            ,value: {{.Time}}
+            , range: true //或 range: '~' 来自定义分割字符
+            // ,min: -30 //31天前
+            ,max: 0 //今天
+            , done: function (value, date, endDate) {
+                // console.log(value); //得到日期生成的值，如：2017-08-18
+
+                var d = value.split(' - ');
+                var s = new Date(d[0]);
+                var e = new Date(d[1]);
+                //计算两个时间间隔天数
+                var d = (e-s)/(1000*60*60*24);
+                if(d >= 31){
+                    layer.alert('最多选择31天');
+                }else{
+                    $("#alarm_time").val(value);
+                    reloadTabel($("#zId").val());
+                }
+            },
+            change: function(value, date, endDate){
+                var d = value.split(' - ');
+                var s = new Date(d[0]);
+                var e = new Date(d[1]);
+                //计算两个时间间隔天数
+                var d = (e-s)/(1000*60*60*24);
+                if(d >= 31){
+                    start.hint('最多选择31天');
+                    $(".laydate-btns-confirm").hide();
+                }else{
+                    $(".laydate-btns-confirm").show();
+                }
+            }
+        });
+
+        var form = layui.form;
+        var table = layui.table;
+        //监听提交
+        form.on('submit(formDemo)', function (data) {
+            layer.msg(JSON.stringify(data.field));
+            return false;
+        });
+
+        //省监听
+        form.on('select(organize)', function(obj) {
+            reloadTabel(obj.value);
+            alarmLine(obj.value);//查询数据
+            form.render("select",'regionform');
+        });
+
+        // 状态
+        form.on('select(status)', function (obj) {
+            $("#alarmstatus").val(obj.value);
+            table.reload('testReload', {
+                url: '/filter/funcAlarmList',
+                where: {
+                    dateTime: $("#alarm_time").val(),
+                    type: $("#funcType").val(),
+                    status: obj.value,
+                    cameraID: $("#cameraid").val(),
+                    zId : $("#zId").val(),
+                }, //设定异步数据接口的额外参数
+                //,height: 300
+                page:{
+                    curr:1
+                }
+            });
+        });
+
+        //摄像机监听
+        form.on('select(cameraList)', function(obj) {
+            $("#cameraid").val(obj.value);
+            table.reload('testReload', {
+                url: '/filter/funcAlarmList',
+                where: {
+                    dateTime: $("#alarm_time").val(),
+                    type: $("#funcType").val(),
+                    cameraID: obj.value,
+                    status: $("#alarmstatus").val(),
+                    zId : $("#zId").val(),
+                }, //设定异步数据接口的额外参数
+                //,height: 300
+                page:{
+                    curr:1
+                }
+            });
+
+        });
+
+        function reloadTabel(zid){
+            if(zid != null && zid.length>0){
+                $("#zId").val(zid);
+            }
+            table.reload('testReload', {
+                url: '/filter/funcAlarmList',
+                where: {
+                    dateTime: $("#alarm_time").val(),
+                    type: $("#funcType").val(),
+                    status: $("#alarmstatus").val(),
+                    cameraID: $("#cameraid").val(),
+                    zId : zid,
+                }, //设定异步数据接口的额外参数
+                //,height: 300
+                page:{
+                    curr:1
+                }
+            });
+        }
+    });
+    function insertAlarm() {
+        $.ajax({
+            url: '/filter/insertAlarm',
+            method: 'post',
+            data: {'alarmId': $("#alarmid").val()},
+            beforeSend: function (xhr) {
+                layer.load(1);       // 数据加载成功之前，使用loading组件
+            },
+            success: function (res) {
+                layer.closeAll();
+                if (res.Ret == 1) {
+                    layer.alert(res.Reason);
+                    var table = layui.table
+                    table.reload('testReload', {
+                        url: '/filter/funcAlarmList',
+                        where: {
+                            dateTime: $("#alarm_time").val(),
+                            type: $("#funcType").val(),
+                            zId : $("#zId").val(),
+                            status: $("#alarmstatus").val(),
+                            cameraID: $("#cameraid").val(),
+                        }, //设定异步数据接口的额外参数
+                    });
+                    alarmLine($("#zId").val());
+                }else {
+                    layer.alert(res.Reason);
+                }
+            },
+            error: function (data) {
+                layer.closeAll();
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+    function misinformation() {
+        $.ajax({
+            url: '/filter/misinformationHandler',
+            method: 'post',
+            data: {'alarmId': $("#alarmid").val()},
+            beforeSend: function (xhr) {
+                layer.load(1);       // 数据加载成功之前，使用loading组件
+            },
+            success: function (res) {
+                layer.closeAll();
+                if (res.Ret == 1) {
+                    layer.alert(res.Reason);
+                    var table = layui.table
+                    table.reload('testReload', {
+                        url: '/filter/funcAlarmList',
+                        where: {
+                            dateTime: $("#alarm_time").val(),
+                            type: $("#funcType").val(),
+                            zId : $("#zId").val(),
+                            status: $("#alarmstatus").val(),
+                            cameraID: $("#cameraid").val(),
+                        }, //设定异步数据接口的额外参数
+                    });
+                    alarmLine($("#zId").val());
+                }else {
+                    layer.alert(res.Reason);
+                }
+            },
+            error: function (data) {
+                layer.closeAll();
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+</script>
+<script>
+    var cameraCode = 1;
+    // console.log("sfs:"+UrlParam.paramValues("type"));
+    layui.config({
+        base: '/static/layui/lay/'
+    }).extend({
+        tablePlug: 'tablePlug/tablePlug'
+    }).use(['element', 'table','tablePlug'], function () {
+        var table = layui.table;
+        var element = layui.element;
+        var tablePlug = layui.tablePlug;
+        tablePlug.smartReload.enable(true);
+
+        table.render({
+            elem: '#alarmTable',
+            id: 'testReload',
+            url: '/filter/funcAlarmList',
+            cellMinWidth: 80,
+            method: 'post',
+            page: true,
+            loading: true,
+            smartReloadModel: true,
+            limits : [5,10,20],
+            cols: [
+                [{
+                    field: 'ID',
+                    title: '事件编号'
+                }, {
+                    field: 'Atime',
+                    title: '时间'
+                },{
+                    field: 'Camera',
+                    title: '摄像机名称',
+                    templet: function(d) {
+                        return d.Camera.Name;
+                    }
+                }, {
+                    field: 'Host',
+                    title: '单位名称',
+                    templet: function (d) {
+                        return d.Camera.Place.Name +"-"+ d.Camera.Place.Organize.Name;
+                    }
+                }, {
+                    field: 'ADetial',
+                    title: '内容',
+                    templet: function (d) {
+                        return d.ADetial;
+                    }
+                },
+                    {
+                        field: 'AType',
+                        title: '事件类型',
+                        templet: function (d) {
+                            var text = "";
+                            if (d.AType == "queue_count") {
+                                text = "离岗监测";
+                            }else if (d.AType === 'sleep_count') {
+                                text = "睡岗监测";
+                            }else if (d.AType === 'fire') {
+                                text = "火焰监测";
+                            }else if (d.AType === 'smoke') {
+                                text = "烟雾监测";
+                            }else if (d.AType === 'boundary') {
+                                text = "区域入侵";
+                            }else if (d.AType === 'cloths') {
+                                text = "着装监控";
+                            }else if (d.AType === 'leakage') {
+                                text = "泄漏监测";
+                            }else {
+                                text = "--";
+                            }
+                            return text;
+                        }
+                    }
+                    ,{
+                        field: 'Status',
+                        title: '状态',
+                        align: 'center',
+                        templet: function (d) {
+                            if(d.Status=="0"){
+                                return '<span style="color: red;">未处理</span>';
+                            }else if(d.Status=="1"){
+                                return '<span style="color: green;">已插入</span>';
+                            }else if(d.Status=="2"){
+                                return '<span style="color: red;">误报</span>';
+                            }else{
+                                return "未知状态";
+                            }
+                        }
+                    }
+                    // ,{
+                    //     title: '操作',
+                    //     align: 'center',
+                    //     toolbar: '#bar',
+                    //     width: 160
+                    // }
+                    // , {
+                    //     field: 'phone',
+                    //     title: '联系电话',
+                    //     templet: function (d) {
+                    //         return '<span>' + d.Camera.Place.Organize.Phone + '</span>'
+                    //     }
+                    // }
+                ]
+            ],
+            where: {
+                type: $("#funcType").val()
+            },
+            parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                return {
+                    "code": res.Code, //解析接口状态
+                    "data": res.Reason,//解析数据列表
+                    "count": res.Num
+                };
+            }
+        });
+        table.on('row(alarmTable)', function (obj) {
+            var data = obj.data;
+            document.getElementById("tcImage").src = "";
+            layer.open({
+                type: 1,
+                title: '',
+                area: '600px',
+                shade: [0.8, '#000'],
+                offset: '50px',
+                content: $("#alermInfo"),
+                success: function (layero, index) {
+                    var type = "";
+
+                    if (obj.data.AType == "queue_count") {
+                        type = "人数超限监测";
+                    }else if (obj.data.AType === 'sleep_count') {
+                        type = "员工睡岗监测";
+                    }else if (obj.data.AType === 'fire') {
+                        type = "漏水漏泥监测";
+                    }else if (obj.data.AType === 'smoke') {
+                        type = "厂区烟雾监测";
+                    }else if (obj.data.AType === 'boundary') {
+                        type = "高危区域监测";
+                    }else if (obj.data.AType === 'cloths') {
+                        type = "闸门人脸识别";
+                    }else if (obj.data.AType === 'leakage') {
+                        type = "泄漏监测";
+                    }
+                    document.getElementById("tcImage").src = "http://" + obj.data.AHead + obj.data.AFile;
+                    document.getElementById("myimage").src = "http://" + obj.data.AHead + obj.data.AFile;
+
+                    $("#alarmid").val(obj.data.ID);
+                    $("#alarm_stream").val(obj.data.Camera.Cdconfig);
+                    $("#alarm_detail_name").text("单位:" + obj.data.Camera.Place.Organize.Name);
+                    $("#alarm_detail_time").text("时间:" + obj.data.Atime);
+                    $("#alarm_detail_content").text("内容:" + obj.data.ADetial);
+                    $("#alarm_detail_type").text("类型:" + type);
+                    if (obj.data.AVideo != "" && obj.data.AVideo != "/") {
+                        $("#alarm_video").val("http://" + obj.data.AHead + obj.data.AVideo);
+                    }else{
+                        $("#alarm_video").val("");
+                    }
+
+                    if(obj.data.Handler == "1"){
+                        $("#chulibtn").addClass("layui-btn-disabled");
+                    }else{
+                        $("#chulibtn").removeClass("layui-btn-disabled");
+                    }
+
+                    element.tabChange("alarmTab", "alarmTabpic");
+                    $("#alermInfo").removeClass("layui-hide");
+
+
+                    // if (obj.data.Camera.VideoCode == '0') {//h264
+                    //     cameraCode = "0";
+                    //     $("#sdk_div").addClass("layui-hide");
+                    //     $("#video_div").removeClass("layui-hide");
+                    // }else{//h265
+                    cameraCode = "1";
+                    $("#sdk_div").removeClass("layui-hide");
+                    $("#video_div").addClass("layui-hide");
+                    // }
+                    if(obj.data.Status == "0"){
+                        $("#anniu").removeClass("layui-hide");
+                    }else{
+                        $("#anniu").addClass("layui-hide");
+                    }
+
+                },
+                cancel: function (index, layero) {
+                    $("#alermInfo").addClass("layui-hide");
+                    stopplayerrtsp();
+                    stopplayer();
+                }
+            });
+        });
+
+        element.on('tab(alarmTab)', function (data) {
+            // console.log(this); //当前Tab标题所在的原始DOM元素
+            // console.log(data.index); //得到当前Tab的所在下标
+            // console.log(data.elem); //得到当前的Tab大容器
+
+
+            $("#alermInfo").removeClass("layui-hide");
+            if (data.index == 0) {
+                stopplayer();
+                stopplayerrtsp();
+            }
+            if (data.index == 1) {
+                stopplayerrtsp();
+                var playurl = $("#alarm_video").val();
+                if (playurl != "" && playurl != null) {
+                    var videoPlayer = $("#example_video_2").get(0);
+                    if (typeof (videoPlayer) != "undefined") {
+                        var myPlayer = videojs('example_video_2');
+                        myPlayer.dispose();
+                    }
+                    filePlayFunc(playurl);
+                } else {
+                    var h = '';
+                    h = '<span>暂无短视频</span>';
+                    $("#vieodiv").append(h);
+                }
+            }
+            if (data.index == 2) {
+                stopplayer();
+
+                $("#rtspdiv").css('display', 'none');
+                $("#streamdiv").css('display', 'block');
+
+                var playurl = $("#alarm_stream").val();
+                console.log(playurl);
+                if (playurl != "" && playurl != null) {
+                    if(playurl.indexOf("rtsp:") != "-1"){
+                        $("#rtspdiv").css('display', 'block');
+                        $("#streamdiv").css('display', 'none');
+                        rtspPlayFunc(playurl);
+                    }else{
+                        $("#rtspdiv").css('display', 'none');
+                        $("#streamdiv").css('display', 'block');
+                        var videoPlayer = $("#example_video_2").get(0);
+                        if (typeof (videoPlayer) != "undefined") {
+                            var myPlayer = videojs('example_video_2');
+                            myPlayer.dispose();
+                        }
+                        var r = '';
+                        r += '<video style="margin: 0 auto" id="example_video_2" class="video-js vjs-default-skin" controls  width="' + 480 + '"  height="' + 270 + '" data-setup="{}"> <source src="' + playurl + '" type="rtmp/flv"> </video>';
+                        $("#streamdiv").append(r);
+                        videojs("example_video_2").ready(function () {
+                            var myPlayer = this;
+                            myPlayer.play();
+                        });
+                    }
+                } else {
+                    var h = '';
+                    h = '<span>暂无直播</span>';
+                    $("#streamdiv").append(h);
+                }
+            }
+        });
+    });
+
+
+
+    setInterval(function () {
+        var table = layui.table;
+        table.reload('testReload', {
+            url: '/filter/funcAlarmList',
+            where: {
+                dateTime: $("#alarm_time").val(),
+                type: $("#funcType").val(),
+                zId : $("#zId").val(),
+                status: $("#alarmstatus").val(),
+                cameraID: $("#cameraid").val(),
+            }, //设定异步数据接口的额外参数
+        });
+    },60000);
+
+    // var mcanvas = document.getElementById("h_canvas");
+    // mcanvas.style.backgroundColor = "#000000";
+    //var width = 960;//canvas.width;// 960;// 1920;// 704;//
+    //var height = 540;//canvas.height;// 540;// 1080;// 576;//
+    // var player = new VJSPlayer({"canvas" : mcanvas ,"width":480,"height":270});
+
+    // var video_canvas = document.getElementById("video_canvas");
+    // video_canvas.style.backgroundColor = "#000000";
+    //var width = 960;//canvas.width;// 960;// 1920;// 704;//
+    //var height = 540;//canvas.height;// 540;// 1080;// 576;//
+    // var video_player = new VJSPlayer({"canvas" : video_canvas ,"width":480,"height":270});
+
+    var mcanvas = null;
+    var player = null;
+    var video_canvas = null;
+    var video_player = null;
+
+    //播放rtsp视频流
+    function rtspPlayFunc(url) {
+
+        //var width = 960;//canvas.width;// 960;// 1920;// 704;//
+        //var height = 540;//canvas.height;// 540;// 1080;// 576;//
+        //close the player,if it opened!
+        // video_player.realStop();
+
+        var h = '<canvas id="video_canvas" style="width: 480px;height: 270px" ondblclick="fullscreen()"></canvas>'
+        $("#rtspdiv").empty();
+        $("#rtspdiv").append(h);
+        video_canvas = document.getElementById("video_canvas");
+        video_canvas.style.backgroundColor = "#000000";
+        video_player = new VJSPlayer({"canvas" : video_canvas ,"width":480,"height":270});
+
+        //start play
+        var url = url;
+        var sni = {};//StreamNetInfo
+        sni.url = url;
+        sni.protocol = 20002 //RTSP协议
+        video_player.realPlay(sni);
+    }
+
+    //播放本地视频
+    function filePlayFunc(path) {
+        console.log(path)
+        // if (cameraCode == "0") {
+        //     var h = '';
+        //     h += '<video style="text-align: center" id="example_video_1" class="video-js vjs-default-skin" controls  width="' + 480 + '"  height="' + 270 + '" data-setup="{}"> <source src="' + path + '" type="video/mp4"> </video>';
+        //     $("#video_div").append(h);
+        //     videojs("example_video_1").ready(function(){
+        //         var myPlayer = this;
+        //         myPlayer.play();
+        //     });
+        // }else {
+            //close the player,if it opened!
+            // player.realStop();
+
+         var h = '<canvas id="h_canvas" style="width: 480px;height: 270px" width="480" height="270" ondblclick="hfullscreen()"></canvas>'
+        $("#sdk_div").empty();
+        $("#sdk_div").append(h);
+        mcanvas = document.getElementById("h_canvas");
+        mcanvas.style.backgroundColor = "#000000";
+        player = new VJSPlayer({"canvas" : mcanvas ,"width":480,"height":270});
+
+            //start play
+            var sni = {};//StreamNetInfo
+            sni.url = path;
+            sni.protocol = 1;  //1 文件 2海康，3大华
+            player.recordPlay(sni);
+        // }
+
+    }
+
+    function stopplayer() {
+        // if (cameraCode == "0") {
+        //     var videoPlayer = $("#example_video_1").get(0);
+        //     if (typeof (videoPlayer) != "undefined") {
+        //         var myPlayer = videojs('example_video_1');
+        //         myPlayer.dispose();
+        //     }
+        // }else{
+        if (player != null) {
+            player.realStop();
+        }
+
+
+        // }
+    }
+
+    function stopplayerrtsp() {
+        if (video_player != null) {video_player.realStop();}
+    }
+
+    function timestampToTime(nTime) {
+        var date = new Date(nTime);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        var Y = date.getFullYear() + '-';
+        var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+        var D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + '-';
+        var h = (date.getHours() < 10 ? '0' + (date.getHours()) : date.getHours()) + '-';
+        var m = (date.getMinutes() < 10 ? '0' + (date.getMinutes()) : date.getMinutes()) + '-';
+        var s = (date.getSeconds() < 10 ? '0' + (date.getSeconds()) : date.getSeconds());
+        return Y + M + D + h + m + s;
+    }
+
+</script>
+<script>
+    function alarmLine(zid){
+        // console.log("-------");
+        var type = UrlParam.paramValues("type");
+        $.ajax({
+            url: '/filter/funcChartLine',
+            method: 'post',
+            traditional:true,//防止深度序列化
+            data: { "zId": zid, "type":type},
+            dataType: 'JSON',
+            success: function (res) {
+                if (res.Code != 1) {
+                    layer.alert("获取信息失败");
+                    return
+                }
+                var triefs = new Array();
+                var total_num = new Array();
+                var data = res.Reason;
+                for (var i in data) {
+                    var brief_time = data[i].brief_time;
+                    var num = data[i].num;
+                    triefs.push(brief_time);
+                    total_num.push(num);
+                }
+                getQTOption(triefs, total_num);
+
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+    function pic(){
+        layer.open({
+            type: 1,
+            shade: false,
+            title: false, //不显示标题
+            area: ['99%', '97%'],
+            content: $("#mqp"), //捕获的元素，注意：最好该指定的元素要存放在body最外层，否则可能被其它的相对元素所影响
+            cancel: function(){
+                $("#mqp").addClass("layui-hide");
+            },
+            success:function () {
+                $("#mqp").removeClass("layui-hide");
+            }
+        });
+    }
+    function getQTOption(triefs, total_num) {
+        var type = UrlParam.paramValues("type");
+        var icon = ""
+        var title = ""
+
+        if(type == "cloths"){
+            title="闸门人脸识别";
+            icon = "/static/images/platform/icon-shanggang.png";
+        }else if(type == "smoke"){
+            title="厂区烟雾监测";
+            icon = "/static/images/platform/icon-yanwu.png";
+        }else if(type == "fire"){
+            title="漏水漏泥监测";
+            icon = "/static/images/platform/icon-huoyan.png";
+        }else if(type == "boundary"){
+            title="高危区域监测";
+            icon = "/static/images/platform/icon-zhoujie.png";
+        }else if(type == "queue_count"){
+            title="人数超限监测";
+            icon = "/static/images/platform/icon-ligang.png";
+        }else if(type == "sleep_count"){
+            title="员工睡岗监测";
+            icon = "/static/images/platform/icon-shuigang.png";
+        }else if(type == "leakage"){
+            title="泄漏监测";
+            icon = "/static/images/platform/icon-xielou.png";
+        }
+        var myChart = echarts.init(document.getElementById("char4"));
+        option = {
+            color: ['#00e4ff'],
+            grid: {
+                left: '2%',
+                right: '2%',
+                bottom: '1%',
+                containLabel: true
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                },
+                formatter: function (params) {
+                    var cnt = "",
+                        htmlStr = "<div style='padding: 10px;'>",
+                        zong = 0;
+
+
+                    for (var i=0; i< params.length; i++) {
+                        //     zong += Number(params[i].data)
+                        cnt += "<div style='height: 20px;line-height: 20px;'>";
+                        cnt += "<i style='display: inline-block;margin-right: 5px;background: url(" + icon + ");background-size: 100%;width: 16px;height: 16px;margin-top: 2px;float: left;'></i>" + params[i].seriesName + ":" + params[i].data + "<br/>";
+                        cnt += "</div>"
+                    }
+
+                    // htmlStr += "总量：" + zong;//params[0].name;
+                    htmlStr += cnt;
+
+                    htmlStr += "</div>";
+                    return htmlStr;
+                }
+            },
+            xAxis: {
+                type: 'category',
+                data: triefs,
+                axisLabel: {
+                    color: '#00fcf9'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#4574d6'
+                    }
+                },
+                splitLine: {
+                    show: true,
+                    lineStyle: {
+                        color: '#4574d6'
+                    }
+                }
+
+            },
+            yAxis: {
+                type: 'value',
+                minInterval: 1,
+                axisLabel: {
+                    color: '#00fcf9'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#4574d6'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: '#4574d6'
+                    }
+                }
+            },
+            series: [
+                {
+                    name: title,
+                    type: 'line',
+                    data: total_num,
+                    itemStyle: {
+                        color: '#FF5809'
+                    },
+                }
+
+            ]
+        };
+        myChart.setOption(option);
+        window.addEventListener("resize", function () {
+            echarts.init(document.getElementById("char4")).resize();
+        });
+    }
+
+</script>
+<input type="hidden" id="video_switch"/>
+<input type="hidden" id="STAyear"/>
+<input type="hidden" id="STAmonth"/>
+<input type="hidden" id="STAday"/>
+<input type="hidden" id="STAHour"/>
+<input type="hidden" id="STAminute"/>
+<input type="hidden" id="STAsecond"/><br>
+<input type="hidden" id="STOyear"/>
+<input type="hidden" id="STOmonth"/>
+<input type="hidden" id="STOday"/>
+<input type="hidden" id="STOHour"/>
+<input type="hidden" id="STOminute"/>
+<input type="hidden" id="STOsecond"/><br>
+<input type="hidden" id="GetVideoStreamType"/><br>
+<input type="hidden" id="User"/>
+<input type="hidden" id="Passwd"/>
+<input type="hidden" id="Port"/>
+<input type="hidden" id="Channel"/>
+<input type="hidden" id="IP"/>
+<input type="hidden" id="alarmid" />
+<input type="hidden" id="cameraid" />
+<input type="hidden" id="alarmstatus" />
+
+<div id="mqp" class="layui-hide" style="text-align: center;">
+    <img id="myimage" style="text-align: center" data-action="zoom" class="pull-center"/>
+</div>
+
+</html>

@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>长庆石化公司视频行为分析预警平台</title>
+		<link rel="stylesheet" href="/static/layui/css/layui.css" />
+		<link rel="stylesheet" href="/static/css/video-js.css" />
+		<script src="/static/js/video.js"></script>
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+			}
+
+			body {
+				width: 100%;
+				color: white;
+			}
+
+			.root-view {
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				background: #1b2048;
+			}
+
+			.view-header {
+				height: 82px;
+				/*line-height: 60px;*/
+				/* background-color: #23262E; */
+				text-align: center;
+
+			}
+
+			.view-body {
+				position: absolute;
+				top: 82px;
+				left: 0;
+				right: 0;
+				bottom: 0;
+			}
+
+			.body-color {
+				/* background-color: #F2F2F2; */
+				background: rgba(0,0,255, 0.1);
+				overflow: hidden;
+				/*border: 1px solid rgba(0,0,255, 0.5);*/
+			}
+
+			.chart-view {
+				width: 100%;
+				height: 100%;
+				margin: -1.5px 0;
+				/* padding: 0 10px; */
+			}
+
+			.chart-view-item {
+				width: 100%;
+				height: 25%;
+				position: relative;
+				box-sizing: border-box;
+			}
+			
+			.alarm-camera-view{
+				width: 100%;
+				height: 100%;
+				margin: -1.5px 0;
+			}
+			.item-camera{
+				width: 100%;
+				height: 60%;
+				position: relative;
+				box-sizing: border-box;
+
+			}
+			.item-alarm{
+				width: 100%;
+				height: 40%;
+				position: relative;
+				box-sizing: border-box;
+			}
+
+			.item-space3>* {
+				padding: 1.5px 0;
+			}
+			/* .left-view:after, .left-view:before {
+				content: '';
+				display: block;
+				clear: both;
+			} */
+
+			.item-header {
+				width: 100%;
+				height: 24px;
+				font-size: 16px;
+				border-left: 3px solid #45cae9;
+				background: linear-gradient(to right top, #1a5285,rgba(28,8,79,0.3));
+			}
+			.item-header>span{
+				
+			}
+
+			.item-body {
+				position: absolute;
+				left: 0;
+				right: 0;
+				top: 24px;
+				bottom: 0;
+				background: linear-gradient(to right top, #1a5285,rgba(28,8,79,0.3));
+			}
+			
+			.layui-table,
+			.layui-table-header,
+			.layui-table thead tr,
+			.layui-table-hover,
+			.layui-table tbody tr:hover,
+			.layui-table-click
+			{
+				color: white;
+				background: transparent;
+			}
+			.layui-table-header{
+				background: #313d91;
+			}
+			
+			.layui-table-view,
+			.layui-table td,
+			.layui-table th,
+			.layui-table-header{
+				border: 0;
+			}
+
+			.layui-table-view{
+				margin: 0;
+			}
+			.layui-layer-content{
+				color: #000000;
+			}
+
+			::-webkit-scrollbar {display:none}
+
+
+			.alarm-header{
+				text-align: center;
+				width: 50%;
+				background: #313d91;
+				width: 100%;
+				height: 30px;
+				line-height: 30px;
+			}
+			.alarm-content{
+				position: absolute;
+				left: 0;
+				top: 30px;
+				right: 0;
+				bottom: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="root-view">
+			<div class="view-header">
+				<span style="font-size: 36px;font-weight: bold;color: white;line-height: 82px;">长庆石化公司视频行为分析预警平台</span>
+				<div style="position: absolute;right: 10px;top: 10px">
+					<div id="mytime" style="font-size: 34px;font-weight: bold;">
+						<script type="text/javascript">
+							function showTime(){
+								nowtime = new Date();
+								document.getElementById("mytime").innerText= nowtime.getHours()+':'+checkTime(nowtime.getMinutes())+':'+checkTime(nowtime.getSeconds());
+
+							}
+							function checkTime(i)
+							{
+								if (i<10)
+								{i="0" + i}
+								return i
+							}
+							var terval = setInterval("showTime()",1000);
+						</script>
+					</div>
+					<div style="font-size: 16px;">
+						<script type="text/javascript">
+							var d = new Date();
+							document.write(d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日'+' 星期'+'日一二三四五六'.charAt(new Date().getDay()));
+						</script>
+					</div>
+				</div>
+			</div>
+			<div class="view-body">
+				<div class="layui-row layui-col-space3" style="width: 100%;height: 100%;">
+					<div class="layui-col-sm3 layui-col-md3 layui-col-lg3" style="height: 100%;padding: 0 10px;">
+						<div class="chart-view item-space3">
+							<div class="chart-view-item">
+								<div class="body-color" style="width: 100%;height: 100%;"  onclick="">
+									<div class="item-header" style="">
+										<span style="padding: 8px;">全厂报警分布</span>
+									</div>
+									<div class="item-body">
+										<div class="layui-row" style="height: 100%;">
+											<div class="layui-col-sm6 layui-col-md6 layui-col-lg6" style="height: 100%;">
+												<div class="layui-row" style="height: 100%;">
+													<div class="layui-col-sm6 layui-col-md6 layui-col-lg6" style="height: 100%;position: relative;">
+														<img src="/static/images/info_7.png" width="50%" style="position: absolute;top: 50%;margin-top: -25%;left: 50%;margin-left: -25%;" />
+													</div>
+													<div class="layui-col-sm6 layui-col-md6 layui-col-lg6" style="height: 100%;">
+														<div style="width: 100%;height: 50%;position: relative;">
+															<div style="position: absolute;bottom: 5px;font-size: 16px;font-weight: bold;">报警数</div>
+														</div>
+														<div style="width: 100%;height: 50%;position: relative;">
+															<div style="position: absolute;top: 5px;">
+																<span style="font-size: 16px;font-weight: bold;color: orange;" id="alarmNumAll">0</span>
+																<span style="font-size: 12px;">个</span>
+															</div>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="layui-col-sm6 layui-col-md6 layui-col-lg6" style="height: 100%;">
+												<div id="fac_dis_chart" style="width: 100%;height: 100%;"></div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="chart-view-item">
+								<div class="body-color" style="width: 100%;height: 100%;" onclick="">
+									<div class="item-header" style="">
+										<span style="padding: 8px;">员工劳保上岗监测</span>
+									</div>
+									<div class="item-body">
+										<div id="work_clothes_chart" style="width: 100%;height: 100%;"></div>
+									</div>
+								</div>
+							</div>
+							<div class="chart-view-item">
+								<div class="body-color" style="width: 100%;height: 100%;" onclick="">
+									<div class="item-header" style="">
+										<span style="padding: 8px;">厂区火苗事件监测</span>
+									</div>
+									<div class="item-body">
+										<div id="firework_chart" style="width: 100%;height: 100%;"></div>
+									</div>
+								</div>
+							</div>
+							<div class="chart-view-item">
+								<div class="body-color" style="width: 100%;height: 100%;" onclick="">
+										<div class="item-header" style="">
+										<span style="padding: 8px;">高危区域安全监测</span>
+									</div>
+									<div class="item-body">
+										<div id="perimeter_chart" style="width: 100%;height: 100%;"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-sm6 layui-col-md6 layui-col-lg6" style="height: 100%;">
+						<div id="content" class="alarm-camera-view item-space3">
+							<div class="item-camera" id="item-camera">
+								<div class="body-color" style="width: 100%;height: 100%;">
+									<div class="item-header">
+										<span style="padding: 8px;">全厂视频展示</span>
+									</div>
+									<div class="item-body" >
+										<div id="videoView" class="body-color" style="width: 100%;height: 100%;background: #1b2048;" width="javacript:getVideoViewWidth();" height="javacript:getVideoViewHeight();" >
+											<div id="div_sdk" style="display: none;">
+												<object id="TestOcx" width="100%" height="100%" classid="clsid:5C72C14B-973C-4B8F-A3D2-AEA46EFEF7D1"></object>
+											</div>
+											<div id="div_js" style="display: block;">
+
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="item-alarm" id="item-alarm">
+								<div class="body-color" style="width: 100%;height: 100%;">
+									<div class="item-header">
+										<span style="padding: 8px;">报警记录</span>
+									</div>
+									<div class="item-body">
+										<table id="alarmList" class="layui-hide" lay-filter="alarmList" class="layui-table"></table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-sm3 layui-col-md3 layui-col-lg3" style="height: 100%;padding: 0 10px;">
+						<div class="chart-view item-space3">
+							<div class="chart-view-item">
+								<div class="body-color" style="width: 100%;height: 100%;" onclick="">
+									<div class="item-header" style="">
+										<span style="padding: 8px;">厂区烟雾监测</span>
+									</div>
+									<div class="item-body">
+										<div id="fac_trend_chart" style="width: 100%;height: 100%;"></div>
+									</div>
+								</div>
+							</div>
+							<div class="chart-view-item">
+								<div class="body-color" style="width: 100%;height: 100%;" onclick="">
+									<div class="item-header" style="">
+										<span style="padding: 8px;">员工离岗行为监测</span>
+									</div>
+									<div class="item-body">
+										<div id="leave_chart" style="width: 100%;height: 100%;"></div>
+									</div>
+								</div>
+							</div>
+							<div class="chart-view-item">
+								<div class="body-color" style="width: 100%;height: 100%;"  onclick="">
+									<div class="item-header" style="">
+										<span style="padding: 8px;">泄漏监测</span>
+									</div>
+									<div class="item-body">
+										<div id="leakage_chart" style="width: 100%;height: 100%;"></div>
+									</div>
+								</div>
+							</div>
+							<div class="chart-view-item">
+								<div class="body-color" style="width: 100%;height: 100%;" onclick="">
+									<div class="item-header" style="">
+										<span style="padding: 8px;">员工睡岗行为监测</span>
+									</div>
+									<div class="item-body">
+										<div id="sleep_chart" style="width: 100%;height: 100%;"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+	<div class="layui-hide" id="alermInfo">
+		<div style="width:100%;">
+			<div class="layui-tab" style="color:#000;">
+				<ul class="layui-tab-title">
+					<li class="layui-this">图片</li>
+					<li class="">视频</li>
+				</ul>
+				<div class="layui-tab-content">
+					<div class="layui-tab-item layui-show">
+						<img id="alarm_img" src="" style="width:100%;max-height:80%" />
+					</div>
+					<div class="layui-tab-item">
+						<div id="vieodiv"></div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div style="width: 100%;text-align: center;">
+			<button class="layui-btn " style="margin: 20px auto;" data-cdconfig="" data-width="" data-height="" onclick="showCamera()" id="cdconfig">摄像机投射主屏幕</button>
+		</div>
+	</div>
+
+	<script type="text/html" id="bar">
+		<a class="layui-btn  layui-btn-xs" lay-event="detail">查看详情</a>
+	</script>
+	<script src="/static/js/jquery-3.3.1.min.js"></script>
+	<script src="/static/layui/layui.all.js"></script>
+	<script src="/static/js/echarts.min.js"></script>
+	<script src="/static/js/date.format.js"></script>
+	<script>
+
+		var vedioSrc=""
+				,vedioW=""
+				,vedioH="";
+
+		$(function(){
+			window.setInterval(function (){
+				layui.table.reload('alarmList');
+				getData();
+			},20000);
+		});
+
+
+		layui.config({base:'/static/layui/lay/tablePlug/'}).use('tablePlug',function(){
+		// layui.use(['element', 'layer','tablePlug/tablePlug'], function() {
+			var table = layui.table;
+			var layer = layui.layer;
+			var tablePlug = layui.tablePlug;
+
+			tablePlug.smartReload.enable(true);
+
+			table.render({
+				elem: '#alarmList',
+				id: "alarmList",
+				url: '/throwscreen/alarmUntreated',
+				method: 'post',
+				height: getContentHeight(), //"full-575",
+				loading: false,
+				smartReloadModel: true,
+				cols: [
+					[{
+						field: 'ID',
+						title: 'ID',
+						hide: true
+					},
+						{
+							field: 'ADetial',
+							title: '告警信息',
+							align: 'center',
+						},
+						{
+							field: 'org',
+							title: '报警部门',
+							align: 'center',
+							templet: function(d){
+								return '<span>'+d.Camera.Place.Organize.Name+'</span>';
+							},
+							width: 100
+						},
+						{
+							field: 'time',
+							title: '报警时间',
+							align: 'center',
+							templet: function(d){
+								return '<span>'+d.Atime+'</span>';
+							}
+						},
+						{
+							field: 'org_phone',
+							title: '联系方式',
+							align: 'center',
+							templet: function(d){
+								return '<span>'+d.Camera.Place.Organize.Phone+'</span>';
+							}
+						},
+						{
+							field: 'AlarmTime',
+							title: '已报警时间',
+							align: 'center',
+							width: 140,
+							templet: function (d) {
+								var time = new Date(d.Atime);
+								var endTime = new Date();
+
+								var ms = endTime.getTime() - time.getTime();
+								//计算出相差天数
+								var days=Math.floor(ms/(24*3600*1000));
+								//计算出小时数
+								var leave1=ms%(24*3600*1000); //计算天数后剩余的毫秒数
+								var hours=Math.floor(leave1/(3600*1000));
+								//计算相差分钟数
+								var leave2=leave1%(3600*1000);        //计算小时数后剩余的毫秒数
+								var minutes=Math.floor(leave2/(60*1000));
+								//计算相差秒数
+								var leave3=leave2%(60*1000);      //计算分钟数后剩余的毫秒数
+								var seconds=Math.round(leave3/1000);
+
+								var returnStr = ""//seconds + "秒";
+								if(minutes>0) {
+									returnStr = minutes + "分" + returnStr;
+								}
+								if(hours>0) {
+									returnStr = hours + "小时" + returnStr;
+								}
+								if(days>0) {
+									returnStr = days + "天" + returnStr;
+								}
+								if(returnStr.length == 0){
+									returnStr = "1分钟内";
+								}
+
+								return '<span>'+returnStr+'</span>';
+							}
+						},
+						{
+							title: '操作',
+							align: 'center',
+							toolbar: '#bar',
+							width: 120
+						}
+					]
+				],
+				parseData:function (res) {
+					return {
+						"code": res.Code=='1'?"0":res.Code,
+						"msg": "",
+						"count": res.Num,
+						"data": res.Reason
+					}
+				}
+			});
+
+			table.on('tool(alarmList)', function(obj) {
+				if (obj.event === 'detail') {
+					layer.open({
+						type: 1,
+						title: '报警信息查看',
+						area: ['500px','600px'],
+						offset: '100px',
+						content: $("#alermInfo"),
+						success: function(layero, index) {
+							$("#alermInfo").removeClass("layui-hide");
+							console.log(obj.data);
+							document.getElementById("alarm_img").src = "http://"+obj.data.AHead+obj.data.AFile;
+							document.getElementById("cdconfig").dataset["cdconfig"]=obj.data.Camera.Cdconfig;//setAttribute("data-cdconfig",obj.data.cdconfig);
+							document.getElementById("cdconfig").dataset["width"]=obj.data.Camera.WRate;
+							document.getElementById("cdconfig").dataset["height"]=obj.data.Camera.HRate;
+
+							var imgView = document.getElementsByClassName("layui-tab-content")[0];
+							var width = imgView.getBoundingClientRect().width-20,
+									height = width*720/1280 ;
+							// if (height>imgView.getBoundingClientRect().height) {
+							// 	height=imgView.getBoundingClientRect().height
+							// }
+							var videoPlayer = $("#example_video_1").get(0);
+							if (typeof (videoPlayer) != "undefined") {
+								var myPlayer = videojs('example_video_1');
+								myPlayer.dispose();
+							}
+							var h = '';
+							h += '<video style="text-align: center;min-width: 480px;min-height: 270px;" id="example_video_1" class="video-js vjs-default-skin" controls  width="'+width+'"  height="'+height+'" data-setup="{}"> <source src="' + "http://"+obj.data.AHead+obj.data.AVideo + '" type="video/mp4"> </video>';
+							$("#vieodiv").empty();
+							$("#vieodiv").append(h);
+
+							videojs("example_video_1").ready(function () {
+								var myPlayer = this;
+								// myPlayer.src("http://"+obj.data.AlarmHead+obj.data.AlarmVideo);
+								myPlayer.play();
+							});
+						},
+						cancel: function(index, layero) {
+							$("#alermInfo").addClass("layui-hide");
+							var videoPlayer = $("#example_video_1").get(0);
+							if (typeof (videoPlayer) != "undefined") {
+								var myPlayer = videojs('example_video_1');
+								myPlayer.dispose();
+							}
+						}
+					});
+
+				}
+			});
+
+			window.getCamera = function(){
+				$.ajax({
+					url: '/throwscreen/camera',
+					method: 'post',
+					dataType: 'JSON',
+					success: function (res) {
+						// layer.alert(JSON.stringify(res.Reason))
+						if (res.Code == "0" ) {
+							// layer.alert(res.Reason);
+							return;
+						}
+						if (!res.Reason){
+							// layer.alert("没有摄像头");
+							return;
+						}
+						var data = res.Reason[0];
+						var rtspStr = data.cdconfig;
+						if (rtspStr!=""&&rtspStr!=null&&rtspStr.indexOf("rtsp")!=-1) {
+							$("#div_sdk").css('display', 'block');
+							$("#div_js").css('display', 'none');
+							var ocx = document.getElementById("TestOcx");
+							var playparam='{"CmdType":"Play","GetVideoStreamType":"RTSP","Company":"RTSP","RtspUrl":"rtsp://192.168.21.108/test.264"}';
+							ocx.TransCommand(playparam);
+
+							var width = data.width;
+							var height = data.height;
+
+							var w = getVideoViewWidth();
+							var h = parseInt(w) * parseInt(height) / parseInt(width);
+
+							vedioSrc = rtspStr;
+							vedioH = h;
+							vedioW = w;
+							ocx.setAttribute('height',h-22);
+							ocx.setAttribute('width',w);
+						}else{
+							$("#div_sdk").css('display', 'none');
+							$("#div_js").css('display', 'block');
+							var div_js = document.getElementById("div_js");
+							var width = data.width;
+							var height = data.height;
+
+							var w = getVideoViewWidth();
+							var h = parseInt(w) * parseInt(height) / parseInt(width);
+
+							vedioSrc = rtspStr;
+							vedioH = h;
+							vedioW = w;
+							div_js.setAttribute('height',h-22);
+							div_js.setAttribute('width',w);
+
+							var html = "<video id='video' class='video-js btn-default-skin' width='" + w + "' height='" + h + "' controls preload='auto' data-setup='{}'  autopaly='autoplay'>\n" +
+									"<source src='" + rtspStr + "'type=\"rtmp/flv\"></source>\n" +
+									"</video>"
+							$("#div_js").append(html);
+							videojs("video").ready(function () {
+								var myPlayer = this;
+								myPlayer.play();
+							});
+
+						}
+
+
+
+						var ic = document.getElementById("item-camera");
+						ic.setAttribute('style',"height:"+(h+24)+"px");
+						var h2 = content.offsetHeight - h-24;
+						var ia = document.getElementById("item-alarm");
+						ia.setAttribute('style',"height:"+h2+"px");
+
+						var s = "full-"+Math.floor(h+137);
+
+						table.reload('alarmList',{
+							height:s,
+						});
+					},
+					error: function (data) {
+						layer.alert("服务器连接错误");
+					}
+				});
+			}
+			getCamera();
+
+
+
+			var timeout = null;
+			window.showCamera = function () {
+				var div = document.getElementById("cdconfig");
+
+				var cdconfig = div.dataset["cdconfig"];
+
+				var width = parseInt(div.dataset["width"]);
+				var height = parseInt(div.dataset["height"]);
+				var w = getVideoViewWidth();
+				var h = parseInt(w) * parseInt(height) / parseInt(width);
+
+				var vh = document.getElementById("video");
+				vh.setAttribute("style","height:"+h+"px");
+				var ocx = document.getElementById("TestOcx")
+				ocx.setAttribute('height',h);
+
+				var ic = document.getElementById("item-camera");
+				ic.setAttribute('style',"height:"+(h+24)+"px");
+				var h2 = content.offsetHeight - h-24;
+				var ia = document.getElementById("item-alarm");
+				ia.setAttribute('style',"height:"+h2+"px");
+				var s = "full-"+Math.floor(h+137);
+				console.log("full:"+s);
+				var table = layui.table;
+				table.reload('alarmList',{
+					height:s,
+				});
+
+
+				loadVideo(cdconfig);
+				var layer = layui.layer;
+				layer.closeAll();
+				if(timeout){
+					clearTimeout(timeout);
+				}
+				timeout = window.setTimeout(function (){
+
+					var vh = document.getElementById("video");
+					vh.setAttribute("style","height:"+vedioH+"px");
+					var ocx = document.getElementById("TestOcx")
+					ocx.setAttribute('height',vedioH);
+
+					var ic = document.getElementById("item-camera");
+					ic.setAttribute('style',"height:"+(vedioH+24)+"px");
+					var h2 = content.offsetHeight - vedioH -24;
+					var ia = document.getElementById("item-alarm");
+					ia.setAttribute('style',"height:"+h2+"px");
+					var s = "full-"+Math.floor(vedioH+137);
+					console.log("full:"+s);
+					var table = layui.table;
+					table.reload('alarmList',{
+						height:s,
+					});
+
+					loadVideo(vedioSrc);
+				},20000);
+			}
+
+		});
+
+		var content = document.getElementById("content");
+
+		function getContentHeight() {
+			var height = content.offsetHeight;
+			var width = content.offsetWidth;
+			var hb = Math.floor(height * 0.4 - 20);
+			return hb;
+		}
+		var videoView = document.getElementById("videoView");
+
+		function getVideoViewHeight() {
+			console.log(videoView.offsetHeight);
+			return videoView.offsetHeight.toString();
+		}
+
+		function getVideoViewWidth() {
+			console.log(videoView.offsetWidth);
+			return videoView.offsetWidth.toString();
+		}
+
+
+
+		function loadVideo(url) {
+
+			if (url!=""&&url!=null&&url.indexOf("rtsp")!=-1) {
+				$("#div_sdk").css('display', 'block');
+				$("#div_js").css('display', 'none');
+				var obj = document.getElementById("TestOcx");
+				obj.TransCommand('{"CmdType":"Close"}');
+				var playparam = '{"CmdType":"Play","GetVideoStreamType":"RTSP","Company":"RTSP","RtspUrl":"' + url + '"}';
+				var ret = obj.TransCommand(playparam);
+				setTimeout(function () {
+					obj.TransCommand('{"CmdType":"FullScreen"}');
+				}, 1000);
+			}else{
+				$("#div_sdk").css('display', 'none');
+				$("#div_js").css('display', 'block');
+				var html = "<video id='video' class='video-js btn-default-skin' width='" + vedioW + "' height='" + vedioH + "' controls preload='auto' data-setup='{}'  autopaly='autoplay'>\n" +
+						"<source src='" + url + "'type=\"rtmp/flv\"></source>\n" +
+						"</video>"
+				$("#div_js").append(html);
+				videojs("video").ready(function () {
+					var myPlayer = this;
+					myPlayer.play();
+				});
+			}
+
+		}
+
+
+
+	</script>
+	<script>
+	"use strict";
+		var fac_dis_chart = echarts.init(document.getElementById("fac_dis_chart"));
+		var work_clothes_chart = echarts.init(document.getElementById("work_clothes_chart"));
+		var firework_chart = echarts.init(document.getElementById("firework_chart"));
+		var perimeter_chart = echarts.init(document.getElementById("perimeter_chart"));
+		var fac_trend_chart = echarts.init(document.getElementById("fac_trend_chart"));
+		var leave_chart = echarts.init(document.getElementById("leave_chart"));
+		var sleep_chart = echarts.init(document.getElementById("sleep_chart"));
+		var leakage_chart = echarts.init(document.getElementById("leakage_chart"));
+
+		function facDisChart(brief_times,smoke,fire,cloths,boundary,leave,sleep,leakage) {
+			var option = {
+				tooltip: {
+					trigger: 'item',
+					formatter: "{a} <br/>{b}: {c} ({d}%)"
+				},
+				series: [{
+					name: '来源',
+					type: 'pie',
+					radius: ['50%', '70%'],
+					center: ['50%', '50%'],
+					avoidLabelOverlap: false,
+					label: {
+						normal: {
+							show: false,
+							position: 'center'
+						},
+						emphasis: {
+							show: true,
+							textStyle: {
+								fontSize: '15',
+								fontWeight: 'bold'
+							}
+						}
+					},
+					labelLine: {
+						normal: {
+							show: false
+						}
+					},
+					data: [{
+							value: cloths,
+							name: '员工劳保上岗监测'
+						},
+						{
+							value: smoke,
+							name: '厂区烟雾监测'
+						},
+						{
+							value: fire,
+							name: '厂区火苗事件监测'
+						},
+						{
+							value: boundary,
+							name: '高危区域安全监测'
+						},
+						{
+							value: leave,
+							name: '员工离岗行为监测'
+						},
+						{
+							value: sleep,
+							name: '员工睡岗行为监测'
+						},
+						{
+							value: leakage,
+							name: '泄漏监测'
+						}
+					]
+				}]
+			}
+			fac_dis_chart.setOption(option);
+		}
+
+		function workClothesChart(brief_times,num_1) {
+			var option = {
+				tooltip: {
+					trigger: 'axis',
+					axisPointer: { // 坐标轴指示器，坐标轴触发有效
+						type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+					}
+				},
+				grid: {
+					top: '8%',
+					left: '0%',
+					right: '5%',
+					bottom: '3%',
+					containLabel: true
+				},
+				yAxis: {
+					// show: false,
+					type: 'value',
+					minInterval: 1,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					},
+					splitLine: {
+						show:false,
+					}
+
+				},
+				xAxis: {
+					type: 'category',
+					data: brief_times,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					}
+				},
+				series: [{
+						name: '员工劳保上岗监测',
+						type: 'bar',
+						// stack: '总量',
+						label: {
+							normal: {
+								show: true,
+								position: 'insideRight'
+							}
+						},
+						data: num_1
+					}
+					// ,
+					// {
+					// 	name: '未带安全帽',
+					// 	type: 'bar',
+					// 	// stack: '总量',
+					// 	label: {
+					// 		normal: {
+					// 			show: true,
+					// 			position: 'insideRight'
+					// 		}
+					// 	},
+					// 	data: num_2
+					// }
+				]
+			}
+			work_clothes_chart.setOption(option);
+		}
+
+		function fireworkChart(brief_times,num_fire) {
+			var option = {
+				tooltip: {
+					trigger: 'axis'
+				},
+				grid: {
+					top: '8%',
+					left: '0%',
+					right: '5%',
+					bottom: '3%',
+					containLabel: true
+				},
+				xAxis: {
+					type: 'category',
+					boundaryGap: false,
+					data: brief_times,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					}
+				},
+				yAxis: {
+					// show: false,
+					type: 'value',
+					minInterval: 1,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					},
+					splitLine: {
+						show:false,
+					}
+				},
+				series: [{
+						name: '厂区火苗事件监测',
+						type: 'line',
+						stack: '总量',
+						// areaStyle: {},
+						data: num_fire
+					}
+					// ,
+					// {
+					// 	name: '烟雾',
+					// 	type: 'line',
+					// 	stack: '总量',
+					// 	data: num_smoke
+					// }
+				]
+			}
+			firework_chart.setOption(option);
+		}
+
+		function perimeterChart(brief_times,num) {
+			var option = {
+				tooltip: {
+					trigger: 'axis',
+					axisPointer: { // 坐标轴指示器，坐标轴触发有效
+						type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+					}
+				},
+				grid: {
+					top: '8%',
+					left: '0%',
+					right: '5%',
+					bottom: '3%',
+					containLabel: true
+				},
+				xAxis: {
+					type: 'category',
+					// boundaryGap: false,
+					data: brief_times,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					}
+				},
+				yAxis: {
+					// show: false,
+					type: 'value',
+					minInterval: 1,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					},
+					splitLine: {
+						show:false,
+					}
+				},
+				series: [
+				    {
+						name: '高危区域安全监测',
+						type: 'bar',
+						// stack: '总量',
+						label: {
+							normal: {
+								show: true,
+								position: 'insideRight'
+							}
+						},
+						data: num
+					}
+
+				]
+			}
+			perimeter_chart.setOption(option);
+		}
+
+		function facTrendChart(brief_times,nums) {
+			var option = {
+
+
+                tooltip: {
+                    trigger: 'axis'
+                },
+                grid: {
+                    top: '8%',
+                    left: '0%',
+                    right: '5%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: brief_times,
+                    axisLine: {
+                        lineStyle: {
+                            color: '#fff'
+                        }
+                    }
+                },
+                yAxis: {
+                    // show: false,
+                    type: 'value',
+					minInterval: 1,
+                    axisLine: {
+                        lineStyle: {
+                            color: '#fff'
+                        }
+                    },
+                    splitLine: {
+                        show:false,
+                    }
+                },
+                series: [
+                    // {
+                    // name: '火焰预警',
+                    // type: 'line',
+                    // stack: '总量',
+                    // data: num_fire
+                    // }
+                    // ,
+                    {
+                    	name: '厂区烟雾监测',
+                    	type: 'line',
+                    	stack: '总量',
+						// areaStyle: {},
+                    	data: nums
+                    }
+                ]
+			}
+			fac_trend_chart.setOption(option);
+		}
+
+		function leaveChart(brief_times,nums) {
+			var option = {
+				tooltip: {
+					trigger: 'axis',
+					axisPointer: { // 坐标轴指示器，坐标轴触发有效
+						type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+					}
+				},
+				grid: {
+					top: '8%',
+					left: '0%',
+					right: '5%',
+					bottom: '3%',
+					containLabel: true
+				},
+				yAxis: {
+					// show: false,
+					type: 'value',
+					minInterval: 1,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					},
+					splitLine: {
+						show:false,
+					}
+				},
+				xAxis: {
+					type: 'category',
+					data: brief_times,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					}
+				},
+				series: [{
+					name: '员工离岗行为监测',
+					type: 'bar',
+					// stack: '总量',
+					label: {
+						normal: {
+							show: true,
+							position: 'insideRight'
+						}
+					},
+					data: nums
+				}]
+			}
+			leave_chart.setOption(option);
+		}
+
+		function sleepChart(brief_times,nums) {
+			var option = {
+				// color: '#505050',
+				tooltip: {
+					trigger: 'axis',
+					axisPointer: { // 坐标轴指示器，坐标轴触发有效
+						type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+					}
+				},
+				grid: {
+					top: '8%',
+					left: '0%',
+					right: '5%',
+					bottom: '3%',
+					containLabel: true
+				},
+				yAxis: {
+					// show: false,
+					type: 'value',
+					minInterval: 1,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					},
+					splitLine: {
+						show:false,
+					}
+				},
+				xAxis: {
+					type: 'category',
+					data: brief_times,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					}
+				},
+				series: [{
+					name: '员工睡岗行为监测',
+					type: 'bar',
+					// stack: '总量',
+					label: {
+						normal: {
+							show: true,
+							position: 'insideRight'
+						}
+					},
+					data: nums
+				}]
+			}
+			sleep_chart.setOption(option);
+		}
+
+		function leakageChart(brief_times,num_1) {
+			var option = {
+				tooltip: {
+					trigger: 'axis',
+					// axisPointer: {
+					// 	type: 'cross',
+					// 	label: {
+					// 		backgroundColor: '#6a7985'
+					// 	}
+					// }
+				},
+
+
+				grid: {
+					top: '8%',
+					left: '0%',
+					right: '5%',
+					bottom: '3%',
+					containLabel: true
+				},
+				xAxis: [{
+					type: 'category',
+					boundaryGap : false,
+					data: brief_times,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					}
+				}],
+				yAxis: [{
+					// show: false,
+					type: 'value',
+					minInterval: 1,
+					axisLine: {
+						lineStyle: {
+							color: '#fff'
+						}
+					},
+					splitLine: {
+						show:false,
+					}
+				}],
+				series: [
+					{
+						name: '泄漏监测',
+						type: 'line',
+						stack: '总量',
+						// areaStyle: {
+						// 	normal: {}
+						// },
+						data: num_1
+					}
+				]
+			}
+			leakage_chart.setOption(option);
+		}
+
+		// layui.use('layer',function () {
+			function funcSingle(type) {
+				$.ajax({
+					url:"/throwscreen/chartfuncdata",
+					data:{"alarmType":type},
+					dataType:"json",
+					method:"post",
+					error:function (data) {
+						layer.alert("服务器连接错误");
+					},
+					success:function (res) {
+						if(res.Code == "0"){
+							// layer.alert(res.Reason);
+							return;
+						}
+						var brief_times = new Array();
+						var nums = new Array();
+						$.each(res.Reason, function (index, item) {
+							brief_times.push(item.brief_time);
+							nums.push(item.num);
+						});
+
+						if(type == "sleep_count"){
+							sleepChart(brief_times,nums);
+						}else if(type == "queue_count"){
+							leaveChart(brief_times,nums)
+						}else if(type == "fire"){
+                            fireworkChart(brief_times,nums)
+                        }else if(type == "smoke"){
+                            facTrendChart(brief_times,nums)
+                        }else if(type == "boundary"){
+                            perimeterChart(brief_times,nums)
+                        }else if(type == "leakage"){
+                            leakageChart(brief_times,nums)
+                        }else if(type == "cloths"){
+                            workClothesChart(brief_times,nums)
+                        }
+					},
+
+				})
+			}
+
+
+			function allFunc(){
+				$.ajax({
+					url:"/throwscreen/allFunc",
+					data:{},
+					dataType:"json",
+					method:"post",
+					error:function (data) {
+						layer.alert("服务器连接错误");
+					},
+					success:function (res) {
+						if(res.Code == "0"){
+							// layer.alert(res.Reason);
+							return;
+						}
+						var brief_times = new Array();
+						var smoke = new Array();
+						var fire = new Array();
+						var cloths = new Array();
+						var boundary = new Array();
+						var leave = new Array();
+						var sleep = new Array();
+						var leakage = new Array();
+						$.each(res.Reason, function (index, item) {
+							brief_times.push(item.brief_time);
+							smoke.push(item.num_smoke);
+							fire.push(item.num_fire);
+							cloths.push(item.num_cloths);
+							boundary.push(item.num_boundary);
+							leave.push(item.num_leave);
+							sleep.push(item.num_sleep);
+							leakage.push(item.num_leakage);
+							var a = Number(item.num_smoke)+Number(item.num_fire)+Number(item.num_cloths)+Number(item.num_boundary)+Number(item.num_leave)+Number(item.num_sleep)+Number(item.num_leakage);
+                            $("#alarmNumAll").html(a);
+						});
+						facDisChart(brief_times,smoke,fire,cloths,boundary,leave,sleep,leakage);
+					},
+
+				})
+			}
+
+
+
+
+
+	window.addEventListener("resize",function(){
+		fac_dis_chart.resize();
+		work_clothes_chart.resize();
+		firework_chart.resize();
+		perimeter_chart.resize();
+		fac_trend_chart.resize();
+		leave_chart.resize();
+		sleep_chart.resize();
+		leakage_chart.resize();
+		// window.location.reload()
+		var w = getVideoViewWidth();
+		var h = parseInt(w) * parseInt(vedioH) / parseInt(vedioW);
+		var vh = document.getElementById("video");
+		vh.setAttribute("style","height:"+h+"px;"+"width:"+w+"px;");
+		// vh.setAttribute("style","width:"+w+"px");
+		var ic = document.getElementById("item-camera");
+		ic.setAttribute('style',"height:"+(h+24)+"px");
+		var h2 = content.offsetHeight - h-24;
+		var ia = document.getElementById("item-alarm");
+		ia.setAttribute('style',"height:"+h2+"px");
+		var s = "full-"+Math.floor(h+137);
+		var table = layui.table;
+		table.reload('alarmList',{
+			height:s,
+		});
+	});
+
+		function getData() {
+			funcSingle("sleep_count");
+			funcSingle("queue_count");
+            funcSingle("cloths");
+            funcSingle("leakage");
+            funcSingle("boundary");
+            funcSingle("fire");
+            funcSingle("smoke");
+			allFunc();
+		}
+	getData();
+	</script>
+
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{{.SystemTitle}}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css" />
+    <link rel="stylesheet" href="/static/css/zTreeStyle/zTreeStyle.css"/>
+    <script src="/static/layui/layui.js"></script>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/js/jquery.ztree.all.js"></script>
+</head>
+<style>
+    html,body{
+        margin: 0;
+        padding: 0;
+    }
+</style>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <!-- 顶部 -->
+    {{template "filter/admin/commons/header.html" .}}
+    <!-- 菜单 -->
+    {{template "filter/admin/commons/menu.html" .}}
+    <div class="layui-body">
+        <div style="padding: 5px;">
+            <blockquote class="layui-elem-quote font-weight">账户管理</blockquote>
+        </div>
+        <div style="position: absolute;top: 62px;bottom: 0px;margin: 0 5px;width: 100%;">
+            <div class="layui-row layui-col-space10">
+                <div class="layui-col-md4 layui-col-sm4" style="overflow-x: auto;">
+                    <fieldset class="layui-elem-field" style="max-height: 100%;">
+                        <legend>组织架构</legend>
+                        <div class="layui-card">
+                            <div class="layui-card-body">
+                                <ul id="treeDemo" class="ztree"></ul>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="layui-col-md8  layui-col-sm8">
+                    <div style="height: 250px">
+                        <table id="userList" lay-filter="userList"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+        <button class="layui-btn layui-btn-warm layui-btn-sm" lay-event="edit">修改</button>
+        <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="del">删除</button>
+    </div>
+</script>
+<script>
+    layui.use(['form','table'],function () {
+        var table = layui.table;
+        var form = layui.form;
+
+        table.render({
+            elem: '#userList',
+            method: "post",
+            data: [],
+            page: true,
+            toolbar: "#toolbar",
+            defaultToolbar: '',
+            cellMinWidth: 80,
+            cols: [
+                [{
+                    checkbox: true
+                },
+                    {
+                        field: 'Acount',
+                        title: '用户名',
+                        align: 'center',
+                        // width : 200
+                    },
+                    {
+                        field: 'Organize',
+                        title: '组织架构',
+                        align: 'center',
+                        templet: function (d) {
+                            return '<span>'+d.Organize.Name+'</span>';
+                        },
+                        // width : 200
+                    }
+                ]
+            ],
+            parseData: function (res) {
+
+                return {
+                    "code": res.Ret, //解析接口状态
+                    "data": res.Reason, //解析数据列表
+                    "count": res.Num
+                }
+            }
+        });
+
+        table.on("toolbar(userList)", function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'add':
+                    var treeObj = $.fn.zTree.getZTreeObj("treeDemo");
+                    var nodes = treeObj.getSelectedNodes();
+                    if (nodes.length > 0 && Number(nodes[0]["Level"])<5 && Number(nodes[0]["Level"]) >= 0) {
+
+                        form.val('formUser',{
+                            "member_id":"",
+                            "member_code":"0",
+                            "member_user":"",
+                            "member_pass":"",
+                        })
+
+
+                        layer.open({
+                            type: 1,
+                            title: "添加",
+                            area: ['700px','500px'],
+                            offset: 'auto',
+                            content: $("#roleview"),
+                            cancel: function(index, layero) {
+                                layer.close(index);
+                                $("#roleview").addClass("layui-hide");
+                            },
+                            success: function(index, lavero) {
+                                $("#roleview").removeClass("layui-hide");
+                                $("#member_organizeId").val(nodes[0].id)
+                            }
+                        });
+
+                    } else {
+                        layer.alert("请先选择组织");
+                    }
+
+                    break;
+                case 'edit':
+                    if (checkStatus.data.length != 1) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择单条数据操作'
+                        });
+                    } else {
+
+
+                        layer.open({
+                            type: 1,
+                            title: "修改",
+                            area: ['700px','500px'],
+                            offset: 'auto',
+                            content: $("#roleview"),
+                            cancel: function(index, layero) {
+                                layer.close(index);
+                                $("#roleview").addClass("layui-hide");
+                            },
+                            success: function(index, lavero) {
+                                $("#roleview").removeClass("layui-hide");
+
+                                var jsObject = checkStatus.data;
+                                form.val('formUser',{
+                                    "member_organizeId":jsObject[0].OrganizeID,
+                                    "member_id":jsObject[0].ID,
+                                    "member_code":"1",
+                                    "member_user":jsObject[0].Acount,
+                                    "member_pass":"",
+                                });
+                            }
+                        });
+
+                    }
+                    break;
+                case 'del':
+                    if (checkStatus.data.length != 1) {
+                        layer.open({
+                            title: '温馨提示',
+                            content: '请选择单条数据操作'
+                        });
+                    } else {
+                        var jsObject = checkStatus.data;
+                        layer.open({
+                            title: "删除",
+                            content: "确认删除该成员",
+                            btn: ["确认","取消"],
+                            yes :function(index, layero){
+                                $.ajax({
+                                    url: '/filter/deluser',
+                                    method: 'post',
+                                    data: {"member_id": jsObject[0].ID},
+                                    dataType: 'JSON',
+                                    success: function (res) {
+                                        if (res.Ret == "1") {
+                                            updateUserList();
+                                            layer.closeAll()
+                                        } else {
+                                            layer.alert(res.Reason);
+                                        }
+                                    },
+                                    error: function (data) {
+                                        layer.alert("服务器连接异常");
+                                    }
+                                });
+                            },
+                            btn2  :function(index, layero){
+                                layer.close(index);
+                            }
+                        });
+                    }
+                    break;
+            }
+        })
+
+        form.on('submit(user)',function (data) {
+            var url = "/filter/adduser";
+            if (data.field.member_code != "0"){
+                url = "/filter/edituser";
+            }
+
+            // var password = data.field.member_pass;
+            // var testPassword = /^(?![a-zA-Z]+$)(?![A-Z0-9]+$)(?![A-Z\W_!@#$%^&*`~()-+=]+$)(?![a-z0-9]+$)(?![a-z\W_!@#$%^&*`~()-+=]+$)(?![0-9\W_!@#$%^&*`~()-+=]+$)[a-zA-Z0-9\W_!@#$%^&*`~()-+=]{12}$/;
+            // if (password != "" && testPassword.test(password) == false) {
+            //     layer.alert("错误提示： 平台密码必须强制设置12位，包括大小写字母、数字、特殊符号！");
+            //     return;
+            // }
+
+
+            $.ajax({
+                url:url,
+                method: "post",
+                dataType: "json",
+                data: data.field,
+                success: function(res){
+                    if (res.Ret == "1") {
+                        updateUserList();
+                        layer.closeAll();
+                    }else {
+                        layer.alert(res.Reason);
+                    }
+                },
+                error: function (data) {
+                    layer.alert("服务器连接异常");
+                }
+            })
+
+        })
+    })
+</script>
+
+<script>
+    function updateUserList() {
+        var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+        var treeNode = zTree.getSelectedNodes();
+        if (treeNode.length > 0) {
+
+            //更新列表用户
+            layui.table.reload('userList', {
+                url: "/filter/seluser",
+                where: {
+                    "organize_id": treeNode[0].id,
+                }
+            });
+        }
+    }
+
+    function getTreeList() {
+        $.ajax({
+            url: '/filter/orgtree',
+            method: 'post',
+            dataType: 'JSON',
+            success: function (res) {
+                if(res.Code == "1"){
+                    $.fn.zTree.init($("#treeDemo"), setting, res.Reason);
+                }else{
+                    layer.alert(res.Reason);
+                }
+            },
+            error: function (data) {
+                layer.alert("服务器连接错误");
+            }
+        });
+    }
+
+    var setting = {
+        view: {
+            dblClickExpand: false,
+            showLine: false,
+            selectedMulti: false
+        },
+        data: {
+            keep: {
+                parent: true
+            },
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            onClick: function (event, treeId, treeNode) {
+                var level = treeNode.Level
+                if(Number(level)<5){
+                    updateUserList();
+                }
+
+            }
+        }
+    }
+    getTreeList();
+</script>
+
+</body>
+<div style="width: 100%;" class="layui-hide" id="roleview">
+
+    <div class="layui-row">
+        <div class="layui-col-lg12">
+            <form class="layui-form" lay-filter="formUser" style="margin: 0 20px;">
+                <input id="member_organizeId" name="member_organizeId" type="text" class="layui-hide" />
+                <input id="member_id" name="member_id" type="text" class="layui-hide" />
+                <input id="member_code" name="member_code" type="text" value="0" class="layui-hide" />
+                <input id="jur" name="jur" type="text" value="0,1,2,3,4" class="layui-hide" />
+                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                    <div class="layui-row">
+                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                            <span>登录账号</span>
+                        </div>
+                        <div class="layui-col-md8 layui-col-lg8">
+                            <input class="layui-input" name="member_user" type="text" placeholder="请输入登录账号" lay-verify="required"/>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 100%;height: 38px; line-height: 38px;margin: 10px auto;">
+                    <div class="layui-row">
+                        <div class="layui-col-md4 layui-col-lg4" style="text-align: right;padding-right: 20px;">
+                            <span>登录密码</span>
+                        </div>
+                        <div class="layui-col-md8 layui-col-lg8">
+                            <input class="layui-input" name="member_pass" type="password" lay-verify="member_pass" placeholder="请输入登录密码" />
+                        </div>
+                    </div>
+                </div>
+                <div style="text-align: center;margin:50px;">
+                    <button type="button" class="layui-btn" lay-submit lay-filter="user">保存</button>
+                    <button type="button" class="layui-btn" onclick="cancel()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</html>
